@@ -300,6 +300,9 @@ L.__arrayCopy:
    bclr  BO_IF, CR0_EQ
 #endif
 .L.tableDispatch:
+   
+   bc  BO_ALWAYS, CR0_EQ, L.Testing
+   
         dcbt    r0, r8
         dcbtst  r0, r9
    laddr r11, J9TR_VMThreadRTOCOffset(J9VM_STRUCT) ! Restore TOC/GOT
@@ -319,6 +322,17 @@ L.__arrayCopy:
    laddrx   r11, r11, r7
    mtctr r11
    bctr
+
+   L.Testing:
+   mtctr r7
+   L.TestingLoop:
+     lbz   r6, 0(r8)
+     stb   r6, 0(r9)
+     addi  r8, r8, 1
+     addi  r9, r9, 1
+   bdnz  L.TestingLoop
+   bclr  BO_ALWAYS, CR0_EQ
+        
 
 .L.reverseArrayCopy:
    add   r8, r8, r7
