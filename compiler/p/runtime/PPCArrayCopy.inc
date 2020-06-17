@@ -301,7 +301,17 @@ L.__arrayCopy:
 #endif
 .L.tableDispatch:
    
-   bc  BO_ALWAYS, CR0_EQ, L.Testing
+   .L.Testing:
+   andi. r11, r7, 0x3F
+   bclr BO_IF, CR0_EQ
+   mtctr r11
+   .L.TestingLoop:
+     lbz   r6, 0(r8)
+     stb   r6, 0(r9)
+     addi  r8, r8, 1
+     addi  r9, r9, 1
+   bdnz  .L.TestingLoop
+   bclr  BO_ALWAYS, CR0_EQ
    
         dcbt    r0, r8
         dcbtst  r0, r9
@@ -323,15 +333,6 @@ L.__arrayCopy:
    mtctr r11
    bctr
 
-   L.Testing:
-   mtctr r7
-   L.TestingLoop:
-     lbz   r6, 0(r8)
-     stb   r6, 0(r9)
-     addi  r8, r8, 1
-     addi  r9, r9, 1
-   bdnz  L.TestingLoop
-   bclr  BO_ALWAYS, CR0_EQ
         
 
 .L.reverseArrayCopy:
