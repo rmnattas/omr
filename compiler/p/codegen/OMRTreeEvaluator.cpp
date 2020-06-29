@@ -4530,6 +4530,23 @@ TR::Register *OMR::Power::TreeEvaluator::arraycopyEvaluator(TR::Node *node, TR::
    stopUsingCopyReg3 = TR::TreeEvaluator::stopUsingCopyReg(srcAddrNode, srcAddrReg, cg);
    stopUsingCopyReg4 = TR::TreeEvaluator::stopUsingCopyReg(dstAddrNode, dstAddrReg, cg);
 
+   if(lengthNode->getOpCode().isLoadConst()){
+      // TR::DebugCounter::prependDebugCounter(comp, 
+      //    TR::DebugCounter::debugCounterName(comp, "arraycopyEvaluator/static-counter/(%s)/%s/len=%d", comp->signature(), comp->getHotnessName(comp->getMethodHotness()), lengthNode->getConstValue()), 
+      //    comp->getStartTree()->getNextTreeTop());
+      cg->generateDebugCounter(
+         TR::DebugCounter::debugCounterName(comp, "arraycopyEvaluator/(%s)/%s/len=%d", comp->signature(), comp->getHotnessName(comp->getMethodHotness()), lengthNode->getConstValue())
+         );
+      }
+   else{
+      // TR::DebugCounter::prependDebugCounter(comp, 
+      //    TR::DebugCounter::debugCounterName(comp, "arraycopyEvaluator/static-counter/(%s)/%s/len=??", comp->signature(), comp->getHotnessName(comp->getMethodHotness())), 
+      //    comp->getStartTree()->getNextTreeTop());
+      cg->generateDebugCounter(
+         TR::DebugCounter::debugCounterName(comp, "arraycopyEvaluator/(%s)/%s/len=??", comp->signature(), comp->getHotnessName(comp->getMethodHotness()))
+         );
+      }
+
    // Inline forward arrayCopy with constant length, call the wrtbar if needed after the copy
    if ((simpleCopy || !arrayStoreCheckIsNeeded) &&
         (node->isForwardArrayCopy() || alwaysInlineArrayCopy(cg)) && lengthNode->getOpCode().isLoadConst())
