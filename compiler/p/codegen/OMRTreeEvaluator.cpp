@@ -4766,7 +4766,35 @@ TR::Register *OMR::Power::TreeEvaluator::arraycopyEvaluator(TR::Node *node, TR::
                   }
                }
             }
-         TR::TreeEvaluator::generateHelperBranchAndLinkInstruction(helper, node, conditions, cg);
+
+         if ((simpleCopy /* || !arrayStoreCheckIsNeeded */) && (node->isForwardArrayCopy() || alwaysInlineArrayCopy(cg)))
+            {
+            // if copy length == 4, use inlined copy
+            // TODO: should check for forward?
+            // TODO: should check for simpleCopy?
+            TR::LabelSymbol *start_label = generateLabelSymbol(cg);
+            TR::LabelSymbol *end_label = generateLabelSymbol(cg); 
+            start_label->setStartInternalControlFlow();
+            end_label->setEndInternalControlFlow();
+            TR::LabelSymbol *copy4_label = generateLabelSymbol(cg);
+            TR::Register *condReg = cg->allocateRegister(TR_CCR);
+            TR::InstOpCode::Mnemonic cmp_op = lengthNode->getType().isInt32() ? TR::InstOpCode::cmpli4 : TR::InstOpCode::cmpli8;
+            generateDepLabelInstruction(cg, TR::InstOpCode::label, node, start_label, conditions);
+            generateTrg1Src1ImmInstruction(cg, cmp_op, node, condReg, lengthReg, 4);
+            generateConditionalBranchInstruction(cg, TR::InstOpCode::beq, node, copy4_label, condReg);
+
+            TR::TreeEvaluator::generateHelperBranchAndLinkInstruction(helper, node, conditions, cg);
+            generateLabelInstruction(cg, TR::InstOpCode::b, node, end_label);
+
+            generateLabelInstruction(cg, TR::InstOpCode::label, node, copy4_label);
+            inlineArrayCopy(node, 4, srcAddrReg, dstAddrReg, cg);
+            generateDepLabelInstruction(cg, TR::InstOpCode::label, node, end_label, conditions);
+            cg->stopUsingRegister(condReg);
+            }
+         else
+            {
+            TR::TreeEvaluator::generateHelperBranchAndLinkInstruction(helper, node, conditions, cg);
+            }
          }
    conditions->stopUsingDepRegs(cg);
 
