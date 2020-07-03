@@ -365,6 +365,7 @@ SETVAL(TR_PPCAESCBCDecrypt, TR_FSRH+98)
 SETVAL(TR_PPCAESCBCEncrypt, TR_FSRH+99)
 SETVAL(TR_PPCinterpreterUnresolvedConstantDynamicGlue, TR_FSRH+100)
 SETVAL(TR_PPCnumRuntimeHelpers,TR_FSRH+101)
+SETVAL(TR_PPCarrayCopyTableDispatch,TR_FSRH+102)
 
 SETVAL(TR_ARMdouble2Long,TR_FSRH)
 SETVAL(TR_ARMdoubleRemainder,TR_FSRH+1)

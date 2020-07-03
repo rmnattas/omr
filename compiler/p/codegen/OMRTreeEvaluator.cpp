@@ -4704,8 +4704,25 @@ TR::Register *OMR::Power::TreeEvaluator::arraycopyEvaluator(TR::Node *node, TR::
          {
          TR_RuntimeHelper helper;
 
+         TR::LabelSymbol *end_label = NULL;
+
          if (node->isForwardArrayCopy())
             {
+
+            // if copy length <33 jump to __arrayCopyTableDispatch
+            TR::LabelSymbol *large_copy_label = generateLabelSymbol(cg);
+            end_label = generateLabelSymbol(cg);
+            helper = TR_PPCarrayCopyTableDispatch;
+            TR::Register *condReg = cg->allocateRegister(TR_CCR);
+            TR::InstOpCode::Mnemonic cmp_op = lengthNode->getType().isInt32() ? TR::InstOpCode::cmpli4 : TR::InstOpCode::cmpli8;
+            generateTrg1Src1ImmInstruction(cg, cmp_op, node, condReg, lengthReg, 33);
+            generateConditionalBranchInstruction(cg, TR::InstOpCode::bge, node, large_copy_label, condReg);
+            TR::TreeEvaluator::generateHelperBranchAndLinkInstruction(helper, node, conditions, cg);
+            generateLabelInstruction(cg, TR::InstOpCode::b, node, end_label);
+            generateLabelInstruction(cg, TR::InstOpCode::label, node, large_copy_label);
+            cg->stopUsingRegister(condReg);
+
+
             if (cg->comp()->target().cpu.isAtLeast(OMR_PROCESSOR_PPC_P8) && supportsVSX)
                {
                helper = TR_PPCforwardQuadWordArrayCopy_vsx;
@@ -4767,6 +4784,8 @@ TR::Register *OMR::Power::TreeEvaluator::arraycopyEvaluator(TR::Node *node, TR::
                }
             }
          TR::TreeEvaluator::generateHelperBranchAndLinkInstruction(helper, node, conditions, cg);
+         if (end_label)
+            generateLabelInstruction(cg, TR::InstOpCode::label, node, end_label);
          }
    conditions->stopUsingDepRegs(cg);
 

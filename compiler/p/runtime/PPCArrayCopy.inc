@@ -136,6 +136,8 @@
    .type     FUNC_LABEL(__forwardLEArrayCopy),@function
    .globl    FUNC_LABEL(__leArrayCopy)
    .type     FUNC_LABEL(__leArrayCopy),@function
+   .globl    FUNC_LABEL(__arrayCopyTableDispatch)
+   .type     FUNC_LABEL(__arrayCopyTableDispatch),@function
 
 #elif defined(LINUX)
    .globl    __arrayCopy
@@ -289,6 +291,11 @@ L.__arrayCopy:
    bdnz  .L.wordLoop
    bclr  BO_IF, CR0_EQ
 #endif
+
+
+FUNC_LABEL(__arrayCopyTableDispatch):
+__arrayCopyTableDispatch:
+startproc.__arrayCopyTableDispatch:
 .L.tableDispatch:
         dcbt    r0, r8
         dcbtst  r0, r9
@@ -309,6 +316,8 @@ L.__arrayCopy:
    laddrx   r11, r11, r7
    mtctr r11
    bctr
+endproc.__arrayCopyTableDispatch:
+
 
 .L.reverseArrayCopy:
    add   r8, r8, r7
@@ -1944,8 +1953,8 @@ __forwardQuadWordArrayCopy_vsx:
 startproc.__forwardQuadWordArrayCopy_vsx:
 
    or r6, r7, r7
-   cmpli cr0, CmpAddr, r7, LONG_LENGTH
-   bc BO_IF, CR0_LT, .L.tableDispatch
+   ! cmpli cr0, CmpAddr, r7, LONG_LENGTH
+   ! bc BO_IF, CR0_LT, .L.tableDispatch
    b  L.quadWordAlignment_vsx
 
 endproc.__forwardQuadWordArrayCopy_vsx:

@@ -3906,6 +3906,7 @@ TR_Debug::getRuntimeHelperName(int32_t index)
          case TR_PPCforwardArrayCopy:                              return "__forwardArrayCopy";
          case TR_PPCforwardWordArrayCopy:                          return "__forwardWordArrayCopy";
          case TR_PPCforwardHalfWordArrayCopy:                      return "__forwardHalfWordArrayCopy";
+         case TR_PPCarrayCopyTableDispatch:                        return "__arrayCopyTableDispatch";
 
          case TR_PPCarrayCopy_dp:                                  return "__arrayCopy_dp";
          case TR_PPCwordArrayCopy_dp:                              return "__wordArrayCopy_dp";
