@@ -1609,6 +1609,10 @@ TR::Register *OMR::Power::TreeEvaluator::long2float(TR::Node *node, TR::CodeGene
    TR::Register *srcReg  = cg->evaluate(child);
    TR::Register *trgReg     = cg->allocateSinglePrecisionRegister(TR_FPR);
 
+   printf("l2f-TreeEvaluator: target-cpu=%d, target-64bit=%d, cg-64bit=%d, relocate=%d\n",
+      cg->comp()->target().cpu.id(), cg->comp()->target().is64Bit(), cg->is64BitProcessor(), cg->comp()->compileRelocatableCode());
+   fflush(stdout);
+
    if (cg->comp()->target().cpu.isAtLeast(OMR_PROCESSOR_PPC_P7) &&
       (cg->is64BitProcessor() || (cg->comp()->compileRelocatableCode() && cg->comp()->target().is64Bit())))
       {
