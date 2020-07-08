@@ -702,7 +702,6 @@ INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int64ToInt32, ::testing::Combine(
         std::make_tuple<const char*, int32_t(*)(int64_t)>("l2i", l2i)
     )));
 
-#ifndef TR_TARGET_POWER
 float i2f(int32_t x) {
     return static_cast<float>(x);
 }
@@ -942,7 +941,6 @@ INSTANTIATE_TEST_CASE_P(TypeConversionTest, Int64ToDouble, ::testing::Combine(
     ::testing::Values(
         std::make_tuple<const char*, double(*)(int64_t)>("l2d", l2d)
     )));
-#endif
 
 template <typename F, typename I>
 bool fp_filter(F a)
