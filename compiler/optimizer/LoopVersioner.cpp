@@ -2536,6 +2536,7 @@ bool TR_LoopVersioner::canPredictIters(TR_RegionStructure* whileLoop,
       returnValue = false;
 
    firstChildSymRef = NULL;
+   traceMsg(comp(), "aalattas #0.0: returnValue=%d\n", returnValue);
    if (returnValue)
       {
       returnValue = false;
@@ -2561,6 +2562,7 @@ bool TR_LoopVersioner::canPredictIters(TR_RegionStructure* whileLoop,
          int32_t loopDrivingInductionVar = -1;
          if (!_versionableInductionVariables.isEmpty())
             loopDrivingInductionVar = *(_versionableInductionVariables.getListHead()->getData());
+         traceMsg(comp(), "aalattas #0.1: loopDrivingInductionVar=%d, firstChildSymRef=%d\n", loopDrivingInductionVar, firstChildSymRef->getReferenceNumber());
          if (firstChildSymRef->getReferenceNumber() == loopDrivingInductionVar)
             {
             bool isLoopDrivingAddition = false;
@@ -2573,6 +2575,7 @@ bool TR_LoopVersioner::canPredictIters(TR_RegionStructure* whileLoop,
             }
          }
       }
+   traceMsg(comp(), "aalattas #0.2: returnValue=%d\n", returnValue);
    return returnValue;
    }
 
@@ -2878,6 +2881,8 @@ bool TR_LoopVersioner::detectChecksToBeEliminated(TR_RegionStructure *whileLoop,
             {
             _asyncCheckTree = currentTree;
 
+            //traceMsg(comp(), "aalattas #2.0: _loopTestTree=%s, _asyncCheckTree=%s\n", (_loopTestTree)?'T':'F', (_asyncCheckTree)?'T':'F');
+            traceMsg(comp(), "aalattas #2.0\n");
             if (_loopTestTree &&
             (_loopTestTree->getNode()->getNumChildren() > 1) &&
                _asyncCheckTree /* &&
@@ -2886,16 +2891,21 @@ bool TR_LoopVersioner::detectChecksToBeEliminated(TR_RegionStructure *whileLoop,
                bool isIncreasing;
                TR::SymbolReference* firstChildSymRef;
                bool _canPredictIters = canPredictIters(whileLoop, blocksInWhileLoop, isIncreasing, firstChildSymRef);
-
+               
+               //traceMsg(comp(), "aalattas #2.1: _canPredictIters=%s\n", (_canPredictIters)?'T':'F');
+               traceMsg(comp(), "aalattas #2.1\n");
                if (_canPredictIters)
                   {
+                  traceMsg(comp(), "aalattas #2.3\n");
                   int32_t numIters = whileLoop->getEntryBlock()->getFrequency();
                   //if (numIters > 0.90*comp()->getRecompilationInfo()->getMaxBlockCount())
                   if (numIters < 0.90*(MAX_BLOCK_COUNT+MAX_COLD_BLOCK_COUNT))
+                     traceMsg(comp(), "aalattas #2.4\n");
                      _asyncCheckTree = NULL;
                   }
                else
                   _asyncCheckTree = NULL;
+               //traceMsg(comp(), "aalattas #2.2: _asyncCheckTree=%s\n", (_asyncCheckTree)?'T':'F');
                }
             }
          vcount_t visitCount = comp()->incVisitCount(); //@TODO: unsafe API/use pattern
@@ -3798,14 +3808,17 @@ void TR_LoopVersioner::versionNaturalLoop(TR_RegionStructure *whileLoop, List<TR
 #endif
          }
 
+      traceMsg(comp(), "aalattas #1.0: _canPredictIters=%d, firstChildSymRef=%d\n", _canPredictIters, (firstChildSymRef)?1:0); 
       if (_canPredictIters && firstChildSymRef)
          {
          TR_InductionVariable *v = whileLoop->findMatchingIV(firstChildSymRef);
+         traceMsg(comp(), "aalattas #1.1: firstChildSymRefNumber=%d, v=%d \n", firstChildSymRef->getReferenceNumber(), (v)?1:0);
          if (v && v->getEntry() && v->getExit())
             {
             TR::VPConstraint *entryVal = v->getEntry();
             TR::VPConstraint *exitVal = v->getExit();
             TR::VPConstraint *incrVal = v->getIncr();
+            traceMsg(comp(), "aalattas #1.2: entry=%d, exit=%d, inc=%d \n", entryVal->getHighInt(), exitVal->getLowInt(), incrVal->getLowInt());
             if (entryVal->asIntConstraint() &&
                exitVal->asIntConstraint() &&
                incrVal->asIntConstraint())
@@ -3821,6 +3834,7 @@ void TR_LoopVersioner::versionNaturalLoop(TR_RegionStructure *whileLoop, List<TR
                   _canPredictIters = false;
                }
             }
+            traceMsg(comp(), "aalattas #1.3: _canPredictIters=%d \n", _canPredictIters);
          }
 
       if (shouldOnlySpecializeLoops())
