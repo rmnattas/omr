@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corp. and others
+ * Copyright (c) 2000, 2020 IBM Corp. and others
  *
  * This program and the accompanying materials are made available under
  * the terms of the Eclipse Public License 2.0 which accompanies this
@@ -115,6 +115,7 @@ int32_t TR_LoopCanonicalizer::perform()
    _startOfHeader = NULL;
    _cfg = NULL;
    _rootStructure = NULL;
+   _structureChanged = false;
    _hasPredictableExits = NULL;
 
    _invariantBlocks.deleteAll();
@@ -274,6 +275,8 @@ int32_t TR_LoopCanonicalizer::perform()
    optimizer()->setValueNumberInfo(NULL);
    //requestOpt(loopVersioner);
    requestOpt(OMR::loopVersionerGroup);
+   if (_structureChanged)
+      requestOpt(OMR::inductionVariableAnalysis);
 
    if (trace())
       {
@@ -1390,6 +1393,7 @@ void TR_LoopCanonicalizer::canonicalizeNaturalLoop(TR_RegionStructure *whileLoop
    // in a very specific manner, we didn't use structure repair.
    //
    _cfg->setStructure(_rootStructure);
+   _structureChanged = true;
 
    // The original natural loop is changed so that the original header is
    // replaced by the cloned header, and the first structure of the body becomes
@@ -1771,6 +1775,7 @@ void TR_LoopCanonicalizer::canonicalizeDoWhileLoop(TR_RegionStructure *doWhileLo
       }
 
    _cfg->setStructure(_rootStructure);
+   _structureChanged = true;
 
    TR_StructureSubGraphNode *invariantNode = new (_cfg->structureRegion()) TR_StructureSubGraphNode(invariantBlockStructure);
    parentStructure->addSubNode(invariantNode);
