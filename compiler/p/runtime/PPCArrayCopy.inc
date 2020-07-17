@@ -300,8 +300,8 @@ L.__arrayCopy:
    bclr  BO_IF, CR0_EQ
 #endif
 .L.tableDispatch:
-        dcbt    r0, r8
-        dcbtst  r0, r9
+      !  dcbt    r0, r8
+      !  dcbtst  r0, r9
    laddr r11, J9TR_VMThreadRTOCOffset(J9VM_STRUCT) ! Restore TOC/GOT
 
 #ifdef TR_HOST_64BIT
