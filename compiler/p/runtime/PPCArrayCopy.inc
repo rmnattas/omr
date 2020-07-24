@@ -302,15 +302,37 @@ L.__arrayCopy:
 .L.tableDispatch:
    
    .L.Testing:
+   rlwinm.   r11, r7, 3, 0x7
+   bc BO_IF, CR0_EQ, .L.Testing_lt8
+   mtctr r11
+   .L.TestingLoop:
+#ifdef TR_HOST_64BIT
+#if defined(__LITTLE_ENDIAN__)
+   lfd   fp8, 0(r8)
+   stfd  fp8, 0(r9)
+#else
+   ld      r6, 0(r8)
+   std     r6, 0(r9)
+#endif
+#else
+   lwz   r6, 0(r8)
+   lwz   r5, 4(r8)
+   stw   r6, 0(r9)
+   stw   r5, 4(r9)
+#endif
+   addi  r8, r8, 8
+   addi  r9, r9, 8
+   bdnz  .L.TestingLoop
+   .L.Testing_lt8:
    andi. r11, r7, 0x3F
    bclr BO_IF, CR0_EQ
    mtctr r11
-   .L.TestingLoop:
+   .L.TestingByteLoop:
      lbz   r6, 0(r8)
      stb   r6, 0(r9)
      addi  r8, r8, 1
      addi  r9, r9, 1
-   bdnz  .L.TestingLoop
+   bdnz  .L.TestingByteLoop
    bclr  BO_ALWAYS, CR0_EQ
    
         dcbt    r0, r8
