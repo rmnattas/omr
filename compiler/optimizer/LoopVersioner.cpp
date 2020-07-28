@@ -2879,7 +2879,7 @@ bool TR_LoopVersioner::detectChecksToBeEliminated(TR_RegionStructure *whileLoop,
             _asyncCheckTree = currentTree;
 
             if (_loopTestTree &&
-            (_loopTestTree->getNode()->getNumChildren() > 1) &&
+            // (_loopTestTree->getNode()->getNumChildren() > 1) && 
                _asyncCheckTree &&
                shouldOnlySpecializeLoops())
                {
