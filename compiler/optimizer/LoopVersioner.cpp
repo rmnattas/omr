@@ -2880,9 +2880,14 @@ bool TR_LoopVersioner::detectChecksToBeEliminated(TR_RegionStructure *whileLoop,
          if (currentOpCode.getOpCodeValue() == TR::asynccheck)
             {
             _asyncCheckTree = currentTree;
-
-            //traceMsg(comp(), "aalattas #2.0: _loopTestTree=%s, _asyncCheckTree=%s\n", (_loopTestTree)?'T':'F', (_asyncCheckTree)?'T':'F');
-            traceMsg(comp(), "aalattas #2.0\n");
+  
+            // traceMsg(comp(), "aalattas #2.0: _loopTestTree=%s, _asyncCheckTree=%s, shouldOnlySpecializeLoops=%s\n", (_loopTestTree)?'T':'F', (_asyncCheckTree)?'T':'F', (shouldOnlySpecializeLoops())?'T':'F');
+            traceMsg(comp(), "aalattas #2.0");
+            if(_loopTestTree) traceMsg(comp(), ", _loopTestTree");
+            if(_loopTestTree) traceMsg(comp(), ", _loopTestTree children = %d", _loopTestTree->getNode()->getNumChildren());
+            if(_asyncCheckTree) traceMsg(comp(), ", _asyncCheckTree");
+            if(shouldOnlySpecializeLoops()) traceMsg(comp(), ", shouldOnlySpecializeLoops");
+            traceMsg(comp(), "\n");
             if (_loopTestTree &&
             (_loopTestTree->getNode()->getNumChildren() > 1) &&
                _asyncCheckTree /* &&
@@ -2896,12 +2901,14 @@ bool TR_LoopVersioner::detectChecksToBeEliminated(TR_RegionStructure *whileLoop,
                traceMsg(comp(), "aalattas #2.1\n");
                if (_canPredictIters)
                   {
-                  traceMsg(comp(), "aalattas #2.3\n");
                   int32_t numIters = whileLoop->getEntryBlock()->getFrequency();
+                  traceMsg(comp(), "aalattas #2.3, numIters=%d\n", numIters);
                   //if (numIters > 0.90*comp()->getRecompilationInfo()->getMaxBlockCount())
                   if (numIters < 0.90*(MAX_BLOCK_COUNT+MAX_COLD_BLOCK_COUNT))
+                     {
                      traceMsg(comp(), "aalattas #2.4\n");
                      _asyncCheckTree = NULL;
+                     }
                   }
                else
                   _asyncCheckTree = NULL;
