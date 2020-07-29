@@ -2881,10 +2881,15 @@ bool TR_LoopVersioner::detectChecksToBeEliminated(TR_RegionStructure *whileLoop,
             {
             _asyncCheckTree = currentTree;
 
-            //traceMsg(comp(), "aalattas #2.0: _loopTestTree=%s, _asyncCheckTree=%s\n", (_loopTestTree)?'T':'F', (_asyncCheckTree)?'T':'F');
-            traceMsg(comp(), "aalattas #2.0\n");
+            // traceMsg(comp(), "aalattas #2.0: _loopTestTree=%s, _asyncCheckTree=%s, shouldOnlySpecializeLoops=%s\n", (_loopTestTree)?'T':'F', (_asyncCheckTree)?'T':'F', (shouldOnlySpecializeLoops())?'T':'F');
+            traceMsg(comp(), "aalattas #2.0");
+            if(_loopTestTree) traceMsg(comp(), ", _loopTestTree");
+            if(_loopTestTree) traceMsg(comp(), ", _loopTestTree children = %d", _loopTestTree->getNode()->getNumChildren());
+            if(_asyncCheckTree) traceMsg(comp(), ", _asyncCheckTree");
+            if(shouldOnlySpecializeLoops()) traceMsg(comp(), ", shouldOnlySpecializeLoops");
+            traceMsg(comp(), "\n");
             if (_loopTestTree &&
-            // (_loopTestTree->getNode()->getNumChildren() > 1) && 
+            (_loopTestTree->getNode()->getNumChildren() > 1) && 
                _asyncCheckTree &&
                shouldOnlySpecializeLoops())
                {
