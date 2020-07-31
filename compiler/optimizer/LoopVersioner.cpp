@@ -2880,8 +2880,8 @@ bool TR_LoopVersioner::detectChecksToBeEliminated(TR_RegionStructure *whileLoop,
 
             if (_loopTestTree &&
             (_loopTestTree->getNode()->getNumChildren() > 1) &&
-               _asyncCheckTree &&
-               shouldOnlySpecializeLoops())
+               _asyncCheckTree /* &&
+               shouldOnlySpecializeLoops()*/ )
                {
                bool isIncreasing;
                TR::SymbolReference* firstChildSymRef;
