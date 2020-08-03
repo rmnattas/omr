@@ -448,6 +448,7 @@ TR::VPConstraint *OMR::ValuePropagation::getConstraint(TR::Node *node, bool &isG
      that we know nothing about this node.
     */
    isGlobal = true;
+   traceMsg(comp(), "aalattas #-1.0\n");
 
    // See if there is an existing constraint for this node
    //
@@ -459,8 +460,10 @@ TR::VPConstraint *OMR::ValuePropagation::getConstraint(TR::Node *node, bool &isG
    Relationship *rel = findConstraint(valueNumber, relativeVN);
    if (rel)
       {
+      traceMsg(comp(), "aalattas #-1.1\n");
       if (trace())
          {
+         traceMsg(comp(), "aalattas #-1.2\n");
          traceMsg(comp(), "   %s [%p] has existing constraint:", node->getOpCode().getName(), node);
          rel->print(this, valueNumber, 1);
          }
@@ -474,6 +477,7 @@ TR::VPConstraint *OMR::ValuePropagation::getConstraint(TR::Node *node, bool &isG
    else
       {
       constraint = mergeDefConstraints(node, relativeVN, isGlobal);
+      traceMsg(comp(), "aalattas #-1.3\n");
       }
 
    // If looking at the defs gave us a valid constraint, see if it can
@@ -484,23 +488,27 @@ TR::VPConstraint *OMR::ValuePropagation::getConstraint(TR::Node *node, bool &isG
       {
       TR::VPConstraint *betterConstraint = applyGlobalConstraints(node, valueNumber, constraint, relativeVN);
       addBlockOrGlobalConstraint(node, betterConstraint, isGlobal, relative);
+      traceMsg(comp(), "aalattas #-1.4\n");
       return constraint;
       }
 
    // Look for an existing global constraint.
    //
    rel = findGlobalConstraint(valueNumber, relativeVN);
+   traceMsg(comp(), "aalattas #-1.5\n");
    if (rel)
       {
+      traceMsg(comp(), "aalattas #-1.6\n");
       if (trace())
          {
+         traceMsg(comp(), "aalattas #-1.7\n");
          traceMsg(comp(), "   %s [%p] has existing global constraint:", node->getOpCode().getName(), node);
          rel->print(this, valueNumber, 1);
          }
       isGlobal = true;
       constraint = rel->constraint;
       }
-
+   traceMsg(comp(), "aalattas #-1.8\n");
    return constraint;
    }
 
@@ -876,56 +884,80 @@ TR::Node* generateLenForArrayCopy(TR::Compilation *comp, int32_t elementSize, TR
    TR::Node *len = NULL;
    if (elementSize == 1)
       {
+      traceMsg(comp, "aalattas #12.1\n");
       len = copyLenNode->createLongIfNeeded();
       }
    else if (elementSize == 0)
       {
+      traceMsg(comp, "aalattas #12.2\n");
 #ifdef J9_PROJECT_SPECIFIC
       if (!stride)
+         {
+         traceMsg(comp, "aalattas #12.3\n");
          stride = TR::TransformUtil::generateArrayElementShiftAmountTrees(comp, srcObjNode);
+         }
 #endif
 
       if (is64BitTarget)
          {
-         if (stride->getType().isInt32())
+         traceMsg(comp, "aalattas #12.4\n");
+         if (stride->getType().isInt32()){
+            traceMsg(comp, "aalattas #12.5\n");
             stride = TR::Node::create(TR::i2l, 1, stride);
+            }
 
          if (copyLenNode->getType().isInt32())
             {
+            traceMsg(comp, "aalattas #12.6\n");
             TR::Node *i2lNode = TR::Node::create(TR::i2l, 1, copyLenNode);
             len = TR::Node::create(TR::lshl, 2, i2lNode, stride);
             }
-         else
+         else{
             len = TR::Node::create(TR::lshl, 2, copyLenNode, stride);
+            traceMsg(comp, "aalattas #12.7\n");
+            }
          }
-      else
+      else{
          len = TR::Node::create(TR::ishl, 2, copyLenNode, stride);
+         traceMsg(comp, "aalattas #12.8\n");
+         }
       }
    else
       {
+      traceMsg(comp, "aalattas #12.9\n");
       if (is64BitTarget)
          {
+         traceMsg(comp, "aalattas #12.10\n");
          if (!stride)
             {
+            traceMsg(comp, "aalattas #12.11\n");
             stride = TR::Node::create(n , TR::lconst);
             stride->setLongInt(elementSize);
             }
-         else if (stride->getType().isInt32())
+         else if (stride->getType().isInt32()){
             stride = TR::Node::create(TR::i2l, 1, stride);
+            traceMsg(comp, "aalattas #12.12\n");
+            }
 
          if (copyLenNode->getType().isInt32())
             {
+            traceMsg(comp, "aalattas #12.13\n");
             TR::Node *i2lNode = TR::Node::create(TR::i2l, 1, copyLenNode);
             len = TR::Node::create(TR::lmul, 2, i2lNode, stride);
             }
-         else
+         else{
             len = TR::Node::create(TR::lmul, 2, copyLenNode, stride);
+            traceMsg(comp, "aalattas #12.14\n");
+            }
          }
       else
          {
-         if (!stride)
+         if (!stride){
             stride = TR::Node::create(n, TR::iconst, 0, elementSize);
+            traceMsg(comp, "aalattas #12.15\n");
+            }
          len = TR::Node::create(TR::imul, 2, copyLenNode, stride);
+         traceMsg(comp, "aalattas #12.16\n");
          }
       }
 
@@ -1045,6 +1077,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
 
    // Sanity check
    TR_ASSERT(node->getNumChildren() == 5, "Wrong number of arguments for arraycopy.");
+   traceMsg(comp(), "aalattas #0\n");
 
    TR::Node *srcObjNode = node->getFirstChild();
    TR::Node *srcOffNode = node->getSecondChild();
@@ -1089,17 +1122,24 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
       traceMsg(comp(), "Detected arraylet arraycopy: %p\n", node);
 
    bool isGlobal;
+            traceMsg(comp(), "aalattas #-1\n");
    TR::VPConstraint *srcObject = getConstraint(srcObjNode, isGlobal);
+            traceMsg(comp(), "aalattas #-1.-1, srcObject=%s", (srcObject)?"T":"F");
    TR::VPConstraint *srcOffset = getConstraint(srcOffNode, isGlobal);
+            traceMsg(comp(), "aalattas #-1.-1, srcOffset=%s", (srcOffset)?"T":"F");
    TR::VPConstraint *dstObject = getConstraint(dstObjNode, isGlobal);
+            traceMsg(comp(), "aalattas #-1.-1, dstObject=%s", (dstObject)?"T":"F");
    TR::VPConstraint *dstOffset = getConstraint(dstOffNode, isGlobal);
+            traceMsg(comp(), "aalattas #-1.-1, dstOffset=%s", (dstOffset)?"T":"F");
    TR::VPConstraint *copyLen   = getConstraint(copyLenNode, isGlobal);
+            traceMsg(comp(), "aalattas #-1.-1, copyLen=%s", (copyLen)?"T":"F");
 
    int32_t srcVN = getValueNumber(srcObjNode);
    int32_t dstVN = getValueNumber(dstObjNode);
 
    if (srcVN == dstVN)
       {
+      traceMsg(comp(), "aalattas #0.1\n");
       needArrayStoreCheck = false;
       switch (TR::Compiler->om.writeBarrierType())
          {
@@ -1144,6 +1184,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
        (srcObject && srcObject->getClassType() && srcObject->getClassType()->asFixedClass() && (srcObject->getClassType()->asFixedClass()->isArray() == TR_no)) ||
        (dstObject && dstObject->getClassType() && dstObject->getClassType()->asFixedClass() && (dstObject->getClassType()->asFixedClass()->isArray() == TR_no)) )
       {
+      traceMsg(comp(), "aalattas #0.2\n");
       createExceptionEdgeConstraints(TR::Block::CanCatchUserThrows, NULL, node);
       mustTakeException();
       return;
@@ -1170,6 +1211,19 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
    // If it is OK to convert this call to a possible call to the (fast)
    // arraycopy helper, do it.
    //
+   traceMsg(comp(), "aalattas #0.3");
+
+      if (primitiveTransform) traceMsg(comp(), ", 1.1");
+      if (referenceTransform) traceMsg(comp(), ", 1.2");
+      if (!comp()->getOption(TR_DisableArrayCopyOpts)) traceMsg(comp(), ", 2");
+      if (!node->isDontTransformArrayCopyCall()) traceMsg(comp(), ", 3");
+      if (comp()->fej9()->callTheJitsArrayCopyHelper()) traceMsg(comp(), ", 4");
+      if (!comp()->getOption(TR_DisableInliningOfNatives)) traceMsg(comp(), ", 5");
+      if (!(srcObject && srcObject->isNullObject())) traceMsg(comp(), ", 6");
+      if (!(dstObject && dstObject->isNullObject())) traceMsg(comp(), ", 7");
+      if (srcOffHigh >= 0 && dstOffHigh >= 0 && copyLenHigh >= 0) traceMsg(comp(), ", 8");
+      traceMsg(comp(), "\n");
+
    if ((primitiveTransform || referenceTransform) &&
        !comp()->getOption(TR_DisableArrayCopyOpts) &&
        !node->isDontTransformArrayCopyCall() &&
@@ -1179,27 +1233,32 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
         !(dstObject && dstObject->isNullObject()) &&
         srcOffHigh >= 0 && dstOffHigh >= 0 && copyLenHigh >= 0)
       {
+      traceMsg(comp(), "aalattas #0.4\n");
       transformTheCall = primitiveTransform && referenceTransform;
 
       if (srcObject && srcObject->getClassType())
          {
+         traceMsg(comp(), "aalattas #1\n");
          primitiveArray1 = srcObject->getClassType()->isPrimitiveArray(comp());
          referenceArray1 = srcObject->getClassType()->isReferenceArray(comp());
          }
 
       if (dstObject && dstObject->getClassType())
          {
+         traceMsg(comp(), "aalattas #2\n");
          primitiveArray2 = dstObject->getClassType()->isPrimitiveArray(comp());
          referenceArray2 = dstObject->getClassType()->isReferenceArray(comp());
          }
 
       if (primitiveArray1 || primitiveArray2)
          {
+         traceMsg(comp(), "aalattas #3\n");
          transformTheCall = primitiveTransform;
          }
 
       if (referenceArray1 || referenceArray2)
          {
+         traceMsg(comp(), "aalattas #4\n");
          transformTheCall = referenceTransform;
          }
 
@@ -1303,6 +1362,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
             dstObject->getClassType()->getPrimitiveArrayDataType();
 
          elementSize = TR::Symbol::convertTypeToSize(type);
+         traceMsg(comp(), "aalattas #5, elementSize=%d\n", elementSize);
          }
 
       if (referenceArray1 || referenceArray2)
@@ -1310,6 +1370,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
          type = TR::Address;
 
          elementSize = TR::Compiler->om.sizeofReferenceField();
+         traceMsg(comp(), "aalattas #6, elementSize=%d\n", elementSize);
          }
 
       if (isStringCompressedArrayCopy)
@@ -1317,6 +1378,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
          type = TR::Int8;
 
          elementSize = TR::Symbol::convertTypeToSize(type);
+         traceMsg(comp(), "aalattas #7, elementSize=%d\n", elementSize);
 
          // VP may not know anything about the types of the objects we are copying, hence primitiveArray1 and
          // and primitiveArray2 would both return false. However because we are dealing with a recognized method we
@@ -1331,6 +1393,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
          type = TR::Int16;
 
          elementSize = TR::Symbol::convertTypeToSize(type);
+         traceMsg(comp(), "aalattas #8, elementSize=%d\n", elementSize);
 
          // VP may not know anything about the types of the objects we are copying, hence primitiveArray1 and
          // and primitiveArray2 would both return false. However because we are dealing with a recognized method we
@@ -1512,6 +1575,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
          TR::Node *zeroConst = NULL;
          if (copyLenLow < 0)
             {
+            traceMsg(comp(), "aalattas #9\n");
             if (!zeroConst)
                zeroConst = TR::Node::create(node, TR::iconst, 0, 0);
             checkNode = TR::Node::create(TR::ArrayCopyBNDCHK, 2, copyLenNode, zeroConst);
@@ -1721,6 +1785,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
 
       if (!comp()->generateArraylets())
          {
+         traceMsg(comp(), "aalattas #10\n");
          // -------------------------------------------------------------------
          // Calculate source address node
          // -------------------------------------------------------------------
@@ -1735,6 +1800,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
          }
       else
          {
+         traceMsg(comp(), "aalattas #11\n");
          //aiadd
          //   iaload
          //       aiadd
@@ -1790,7 +1856,9 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
       // Arraycopy length node
       // -------------------------------------------------------------------
 
+      traceMsg(comp(), "aalattas #12.0\n");
       len = generateLenForArrayCopy(comp(), elementSize, stride, srcObjNode, copyLenNode, node);
+      traceMsg(comp(), "aalattas #12.-1\n");
 
       if (primitiveArray1 || primitiveArray2)
          {
