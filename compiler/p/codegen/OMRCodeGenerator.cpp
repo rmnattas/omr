@@ -3082,10 +3082,10 @@ OMR::Power::CodeGenerator::loadAddressConstantFixed(
 
       // lis trgReg, bits[32-47]
       cursor = generateTrg1ImmInstruction(self(), TR::InstOpCode::lis, node, trgReg, canEmitData ? ((int16_t)(value>>16)) : 0, cursor);
-      // ori tempReg, tempReg, bits[16-31]
-      cursor = generateTrg1Src1ImmInstruction(self(), TR::InstOpCode::ori, node, tempReg, tempReg, canEmitData ? ((value>>32) & 0x0000ffff) : 0, cursor);
       // ori trgReg, trgReg, bits[48-63]
       cursor = generateTrg1Src1ImmInstruction(self(), TR::InstOpCode::ori, node, trgReg, trgReg, canEmitData ? (value & 0x0000ffff) : 0, cursor);
+      // ori tempReg, tempReg, bits[16-31]
+      cursor = generateTrg1Src1ImmInstruction(self(), TR::InstOpCode::ori, node, tempReg, tempReg, canEmitData ? ((value>>32) & 0x0000ffff) : 0, cursor);
       // rldimi trgReg, tempReg, 32, 0
       cursor = generateTrg1Src1Imm2Instruction(self(), TR::InstOpCode::rldimi, node, trgReg, tempReg, 32, CONSTANT64(0xFFFFFFFF00000000), cursor);
       }
