@@ -357,12 +357,9 @@ static TR::Register *fconstHandler(TR::Node *node, TR::CodeGenerator *cg, float 
          {
          if (offset<LOWER_IMMED || offset>UPPER_IMMED)
             {
-            srcRegister = cg->allocateRegister();
-
             TR_ASSERT_FATAL_WITH_NODE(node, 0x00008000 != HI_VALUE(offset), "TOC offset (0x%x) is unexpectedly high. Can not encode upper 16 bits into an addis instruction.", offset);
-            generateTrg1Src1ImmInstruction(cg, TR::InstOpCode::addis, node, srcRegister, cg->getTOCBaseRegister(), HI_VALUE(offset));
-            generateTrg1MemInstruction(cg, TR::InstOpCode::lfs, node, trgRegister, new (cg->trHeapMemory()) TR::MemoryReference(srcRegister, LO_VALUE(offset), 4, cg));
-            cg->stopUsingRegister(srcRegister);
+            generateTrg1Src1ImmInstruction(cg, TR::InstOpCode::addis, node, trgRegister, cg->getTOCBaseRegister(), HI_VALUE(offset));
+            generateTrg1MemInstruction(cg, TR::InstOpCode::lfs, node, trgRegister, new (cg->trHeapMemory()) TR::MemoryReference(trgRegister, LO_VALUE(offset), 4, cg));
             }
          else
             {
@@ -434,17 +431,14 @@ TR::Register *OMR::Power::TreeEvaluator::dconstEvaluator(TR::Node *node, TR::Cod
          {
          if (offset<LOWER_IMMED || offset>UPPER_IMMED)
             {
-            srcRegister = cg->allocateRegister();
-
             TR_ASSERT_FATAL_WITH_NODE(node, 0x00008000 != HI_VALUE(offset), "TOC offset (0x%x) is unexpectedly high. Can not encode upper 16 bits into an addis instruction.", offset);
-            generateTrg1Src1ImmInstruction(cg, TR::InstOpCode::addis, node, srcRegister, cg->getTOCBaseRegister(), HI_VALUE(offset));
+            generateTrg1Src1ImmInstruction(cg, TR::InstOpCode::addis, node, trgRegister, cg->getTOCBaseRegister(), HI_VALUE(offset));
 
-            TR::MemoryReference *memRef = new (cg->trHeapMemory()) TR::MemoryReference(srcRegister, LO_VALUE(offset), 8, cg);
+            TR::MemoryReference *memRef = new (cg->trHeapMemory()) TR::MemoryReference(trgRegister, LO_VALUE(offset), 8, cg);
             if (splats)
                memRef->forceIndexedForm(node, cg);
 
             generateTrg1MemInstruction(cg, opcode, node, trgRegister, memRef);
-            cg->stopUsingRegister(srcRegister);
             }
          else
             {
