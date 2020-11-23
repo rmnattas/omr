@@ -481,6 +481,13 @@ TR::Instruction *fixedSeqMemAccess(TR::CodeGenerator *cg, TR::Node *node, intptr
          nibbles[idx] = cursor = generateMemSrc1Instruction(cg, opCode, node, memRef, srcOrTrg, cursor);
       }
 
+   if (tempReg)
+      {
+         TR::RegisterDependencyConditions *dep = new (cg->trHeapMemory()) TR::RegisterDependencyConditions(0, 1, cg->trMemory());
+         dep->addPostCondition(tempReg, TR::RealRegister::NoReg);
+         cursor = generateDepLabelInstruction(cg, TR::InstOpCode::label, node, TR::LabelSymbol::create(cg->trHeapMemory(),cg), dep);
+      }
+
    if (cursorCopy == NULL)
       cg->setAppendInstruction(cursor);
 
