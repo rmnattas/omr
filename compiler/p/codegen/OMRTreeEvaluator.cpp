@@ -191,7 +191,7 @@ void loadFloatConstant(TR::CodeGenerator *cg, TR::InstOpCode::Mnemonic loadOp, T
 
    TR::Instruction *q[4];
 
-   fixedSeqMemAccess(cg, node, 0, q, trgReg, srcReg, loadOp, length, NULL, tmpReg);
+   fixedSeqMemAccess(cg, node, 0, q, trgReg, srcReg, loadOp, length, NULL, tmpReg); 
    cg->findOrCreateFloatConstant(value, type, q[0], q[1], q[2], q[3]);
 
    cg->stopUsingRegister(srcReg);
@@ -479,6 +479,17 @@ TR::Instruction *fixedSeqMemAccess(TR::CodeGenerator *cg, TR::Node *node, intptr
          nibbles[idx] = cursor = generateTrg1MemInstruction(cg, opCode, node, srcOrTrg, memRef, cursor);
       else
          nibbles[idx] = cursor = generateMemSrc1Instruction(cg, opCode, node, memRef, srcOrTrg, cursor);
+      }
+
+   if (tempReg)
+      {
+         TR::RegisterDependencyConditions *dep = new (cg->trHeapMemory()) TR::RegisterDependencyConditions(0, 3, cg->trMemory());
+         dep->addPostCondition(srcOrTrg, TR::RealRegister::NoReg);
+         dep->addPostCondition(baseReg, TR::RealRegister::NoReg);
+         dep->getPostConditions()->getRegisterDependency(1)->setExcludeGPR0();
+         if (srcOrTrg != tempReg) 
+            dep->addPostCondition(tempReg, TR::RealRegister::NoReg);
+         cursor = generateDepLabelInstruction(cg, TR::InstOpCode::label, node, TR::LabelSymbol::create(cg->trHeapMemory(),cg), dep);
       }
 
    if (cursorCopy == NULL)
