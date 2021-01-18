@@ -1264,6 +1264,7 @@ TR::Register *OMR::Power::TreeEvaluator::lstoreEvaluator(TR::Node *node, TR::Cod
       TR::Register *valueReg = cg->evaluate(valueChild);
 
       // Two instruction sequence is not atomic even on uniprocessor.
+      node->getSymbolReference()->getSymbol()->resetVolatile();
       needSync = node->getSymbolReference()->getSymbol()->isSyncVolatile();
 
       if (node->getSymbolReference()->getSymbol()->isShadow() &&
