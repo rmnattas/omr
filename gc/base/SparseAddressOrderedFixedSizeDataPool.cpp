@@ -394,10 +394,12 @@ MM_SparseAddressOrderedFixedSizeDataPool::updateSparseDataEntryAfterObjectHasMov
 	MM_SparseDataTableEntry lookupEntry = MM_SparseDataTableEntry(dataPtr);
 	MM_SparseDataTableEntry *entry = (MM_SparseDataTableEntry *)hashTableFind(_objectToSparseDataTable, &lookupEntry);
 
-	if (NULL == entry || (entry->_dataPtr != dataPtr)) {
+	if (NULL == entry) {
 		Trc_MM_SparseAddressOrderedFixedSizeDataPool_findEntry_failure(dataPtr);
-		/* This should never occur - we should never fail to find the off-heap entry we are trying to update */
-		Assert_MM_true(false);
+		if (entry->_dataPtr != dataPtr) {
+			/* This should never occur - we should never fail to find the off-heap entry we are trying to update */
+			Assert_MM_true(false);
+		}
 		ret = false;
 	} else {
 		Trc_MM_SparseAddressOrderedFixedSizeDataPool_updateEntry_success(dataPtr, entry->_proxyObjPtr, proxyObjPtr);
