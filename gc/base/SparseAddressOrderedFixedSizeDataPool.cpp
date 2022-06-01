@@ -233,7 +233,13 @@ bool
 MM_SparseAddressOrderedFixedSizeDataPool::isValidDataPtr(void *dataPtr)
 {
 	MM_SparseDataTableEntry *entry = findSparseDataTableEntryForSparseDataPtr(dataPtr);
-	return ((entry != NULL) && (entry->_dataPtr == dataPtr));
+	bool ret = true;
+	
+	if (entry != NULL) {
+		ret = (entry->_dataPtr == dataPtr);
+	}
+
+	return ret;
 }
 
 MM_SparseHeapLinkedFreeHeader *
