@@ -2594,6 +2594,9 @@ OMR::Options::jitPreProcess()
    _disabledOptimizations[IVTypeTransformation] = true;
    _disabledOptimizations[basicBlockHoisting] = true;
 
+   // sverma: disable escape analysis for testing
+   _disabledOptimizations[escapeAnalysis] = true;
+
    self()->setOption(TR_DisableTreePatternMatching);
    self()->setOption(TR_DisableHalfSlotSpills);
 
