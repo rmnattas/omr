@@ -537,7 +537,8 @@ public:
    bool hasPinningArrayPointer()
       {
       return (getOpCodeValue() == TR::aiadd)  ||
-             (getOpCodeValue() == TR::aladd);
+             (getOpCodeValue() == TR::aladd)  ||
+             (getOpCodeValue() == TR::aloadi);
       }
 
    bool isLongCompare() const
