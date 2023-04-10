@@ -1844,7 +1844,7 @@ protected:
       // Flag used by TR::ladd and TR::lsub or by TR::lshl and TR::lshr for compressedPointers
       isCompressionSequence                 = 0x00000800,
 
-      // Flag used by TR::aiadd and TR::aladd
+      // Flag used by TR::aiadd, TR::aladd and TR::aloadi
       internalPointer                       = 0x00008000,
 
       // dataAddr pointer node, used by TR::aloadi
