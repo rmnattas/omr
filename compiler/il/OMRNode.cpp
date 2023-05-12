@@ -5901,7 +5901,7 @@ OMR::Node::chkCompressionSequence()
 bool
 OMR::Node::isInternalPointer()
    {
-   return _flags.testAny(internalPointer) && (self()->getOpCode().hasPinningArrayPointer() || self()->getOpCode().isArrayRef());
+   return _flags.testAny(internalPointer) && (self()->isDataAddrPointer() || self()->getOpCode().hasPinningArrayPointer() || self()->getOpCode().isArrayRef());
    }
 
 void
