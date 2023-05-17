@@ -3822,11 +3822,11 @@ OMR::Node::createStoresForVar(TR::SymbolReference * &nodeRef, TR::TreeTop *inser
       storesNeedToBeCreated = false;
       }
 
-   if (isInternalPointer &&
+   if ( (isInternalPointer &&
        self()->getOpCode().isArrayRef() &&
        (comp->getSymRefTab()->getNumInternalPointers() >= (comp->maxInternalPointers()/2) ||
         comp->cg()->supportsComplexAddressing()) &&
-       (self()->getReferenceCount() == 1))
+       (self()->getReferenceCount() == 1)) || (self()->isDataAddrPointer()) )
       {
       storesNeedToBeCreated = false;
       TR::Node *firstChild = self()->getFirstChild();
@@ -3834,11 +3834,10 @@ OMR::Node::createStoresForVar(TR::SymbolReference * &nodeRef, TR::TreeTop *inser
       TR::Node *arrayLoadNode = NULL;
       TR::Node *intOrLongNode = NULL;
 
-
-      if (!firstChild->getOpCode().isArrayRef() &&
+      if ( (!firstChild->getOpCode().isArrayRef() &&
           !firstChild->isInternalPointer()  /* &&
              (!firstChild->getOpCode().isLoadVarDirect() ||
-              !firstChild->getSymbolReference()->getSymbol()->isAuto()) */)
+              !firstChild->getSymbolReference()->getSymbol()->isAuto()) */) || (self()->isDataAddrPointer()))
          {
          TR::SymbolReference *newArrayRef = comp->getSymRefTab()->createTemporary(comp->getMethodSymbol(), TR::Address);
 
@@ -3851,7 +3850,7 @@ OMR::Node::createStoresForVar(TR::SymbolReference * &nodeRef, TR::TreeTop *inser
       else
          storesNeedToBeCreated = true;
 
-      if (!storesNeedToBeCreated)
+      if (!storesNeedToBeCreated && !self()->isDataAddrPointer())
          {
          if (!secondChild->getOpCode().isLoadConst()  /* &&
             (!secondChild->getOpCode().isLoadVarDirect() ||
@@ -3873,6 +3872,11 @@ OMR::Node::createStoresForVar(TR::SymbolReference * &nodeRef, TR::TreeTop *inser
          firstChild->recursivelyDecReferenceCount();
          secondChild->recursivelyDecReferenceCount();
 
+         }
+      else if (self()->isDataAddrPointer())
+         {
+         self()->setAndIncChild(0, arrayLoadNode);
+         firstChild->recursivelyDecReferenceCount();
          }
       }
 
