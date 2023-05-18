@@ -1135,7 +1135,7 @@ static TR::SymbolReference * createSymRefForNode(TR::Compilation *comp, TR::Reso
    else
       {
       bool isInternalPointer = false;
-      if ((value->hasPinningArrayPointer() &&
+      if (((value->hasPinningArrayPointer() || value->isDataAddrPointer()) &&
             value->computeIsInternalPointer()) ||
                (value->getOpCode().isLoadVarDirect() &&
                   value->getSymbolReference()->getSymbol()->isAuto() &&
