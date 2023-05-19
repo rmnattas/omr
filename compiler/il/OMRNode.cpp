@@ -3909,7 +3909,7 @@ OMR::Node::createStoresForVar(TR::SymbolReference * &nodeRef, TR::TreeTop *inser
          if (self()->getOpCode().isArrayRef() || self()->isDataAddrPointer())
             {
             child = self()->getFirstChild();
-            if (child->isInternalPointer())
+            if (child->isInternalPointer() && !child->isDataAddrPointer())
                pinningArray = child->getPinningArrayPointer();
             else
                {
