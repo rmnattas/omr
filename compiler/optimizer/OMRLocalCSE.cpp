@@ -1333,7 +1333,7 @@ TR::Node* OMR::LocalCSE::getAvailableExpression(TR::Node *parent, TR::Node *node
          }
       }
 
-   if ((node->hasPinningArrayPointer() || node->isDataAddrPointer()) &&
+   if (node->hasPinningArrayPointer() &&
        node->computeIsInternalPointer() &&
        cg()->supportsInternalPointers() &&
        (node->getFirstChild()->getOpCodeValue() == TR::aload) &&
