@@ -122,6 +122,7 @@ TR::OptionTable OMR::Options::_jitOptions[] = {
       "narrower than 32-bits (boolean, byte, char, short) are in-range",
       SET_OPTION_BIT(TR_AllowVPRangeNarrowingBasedOnDeclaredType), "F" },
    {"alwaysFatalAssert",       "I\tAlways execute fatal assertion for testing purposes",           SET_OPTION_BIT(TR_AlwaysFatalAssert), "F"},
+   {"alwaysIProfileDuringStartupPhase", "R\t enforce iprofiler during startup phase, overrides noIProfilerDuringStartupPhase", SET_OPTION_BIT(TR_AlwaysIProfileDuringStartupPhase), "F", NOT_IN_SUBSET},
    {"alwaysSafeFatalAssert", "I\tAlways issue a safe fatal assertion for testing purposes",      SET_OPTION_BIT(TR_AlwaysSafeFatal), "F"},
    {"alwaysWorthInliningThreshold=", "O<nnn>\t", TR::Options::set32BitNumeric, offsetof(OMR::Options, _alwaysWorthInliningThreshold), 0, "F%d" },
    {"aotOnlyFromBootstrap", "O\tahead-of-time compilation allowed only for methods from bootstrap classes",
@@ -2091,6 +2092,13 @@ OMR::Options::jitLatePostProcess(TR::OptionSet *optionSet, void * jitConfig)
          OMR::Options::getAOTCmdLineOptions()->setDisabled(rematerialization, true);
          }
       }
+
+   static const char *dnipdsp = feGetEnv("TR_DisableNoIprofilerDuringStartupPhase");
+   if (dnipdsp)
+      self()->setOption(TR_AlwaysIProfileDuringStartupPhase);
+
+   if (self()->getOption(TR_AlwaysIProfileDuringStartupPhase))
+      self()->setOption(TR_NoIProfilerDuringStartupPhase, false);
 
    static const char *ipm = feGetEnv("TR_IProfileMore");
    if (ipm)
