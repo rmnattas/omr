@@ -3698,26 +3698,6 @@ OMR::Node::exceptionsRaised()
    }
 
 TR::Node *
-OMR::Node::convertStoreDirectToLoadWithI2LIfNeeded()
-   {
-   TR::Node *retNode = NULL;
-
-
-   if (self()->getOpCode().isStoreDirect())
-      {
-      TR_ASSERT_FATAL_WITH_NODE(self(), self()->getOpCode().hasSymbolReference(), "parameter error");
-      retNode = TR::Node::createLoad(self(), self()->getSymbolReference());
-      }
-   else if (self()->getReferenceCount() > 0)
-      retNode = self()->duplicateTree();
-   else
-      retNode = self();
-
-   retNode = retNode->createLongIfNeeded();
-   return retNode;
-   }
-
-TR::Node *
 OMR::Node::skipConversions()
    {
    TR::Node * node = self();
