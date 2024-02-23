@@ -2609,9 +2609,9 @@ OMR::Options::jitPreProcess()
       _disabledOptimizations[escapeAnalysis] = true;
       _disabledOptimizations[idiomRecognition] = true;
       // Disable OSR
-      self()->setOption(TR_DisableOSR);
-      self()->setOption(TR_EnableOSR, false);
-      self()->setOption(TR_EnableOSROnGuardFailure, false);
+      // self()->setOption(TR_DisableOSR);
+      // self()->setOption(TR_EnableOSR, false);
+      // self()->setOption(TR_EnableOSROnGuardFailure, false);
       }
 
    self()->setOption(TR_DisableTreePatternMatching);
