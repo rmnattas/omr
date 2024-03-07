@@ -2606,7 +2606,7 @@ OMR::Options::jitPreProcess()
       self()->setOption(TR_DisableUnsafe);
       _disabledOptimizations[unsafeFastPath] = true;
       // sverma: disable opts known to be broken for off heap
-      _disabledOptimizations[escapeAnalysis] = true;
+      // _disabledOptimizations[escapeAnalysis] = true;
       _disabledOptimizations[idiomRecognition] = true;
       }
 
