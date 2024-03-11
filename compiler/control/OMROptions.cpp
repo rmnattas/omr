@@ -2436,11 +2436,17 @@ OMR::Options::jitLatePostProcess(TR::OptionSet *optionSet, void * jitConfig)
 
 // The string passed in as options should be from the -Xjit option
 const char *
-OMR::Options::processOptionsJIT(const char *jitOptions, void *feBase, TR_FrontEnd *fe)
+OMR::Options::processOptionsJIT(char *jitOptions, void *feBase, TR_FrontEnd *fe)
    {
    // Create the default JIT command line options object
    // only do this if this the first time around we're processing options
    //
+   char* ModStr = "exclude={jdk/internal/misc/Unsafe.*},";
+   char* newStr = (char*) malloc(strlen(ModStr) + strlen(jitOptions));
+   strcpy(newStr, ModStr);
+   strcat(newStr, jitOptions);
+   jitOptions = newStr;
+
    if (!_jitCmdLineOptions)
       {
       _jitCmdLineOptions = new (PERSISTENT_NEW) TR::Options();
