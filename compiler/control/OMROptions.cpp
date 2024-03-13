@@ -2441,7 +2441,7 @@ OMR::Options::processOptionsJIT(char *jitOptions, void *feBase, TR_FrontEnd *fe)
    // Create the default JIT command line options object
    // only do this if this the first time around we're processing options
    //
-   char* ModStr = "exclude={jdk/internal/misc/Unsafe.*},";
+   char* ModStr = "exclude={*[Uu]nsafe*},dontinline={*[Uu]nsafe*},";
    char* newStr = (char*) malloc(strlen(ModStr) + strlen(jitOptions));
    strcpy(newStr, ModStr);
    strcat(newStr, jitOptions);
