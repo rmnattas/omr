@@ -1858,7 +1858,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
       node->setNodeIsRecognizedArrayCopyCall(false); // flag conflicts with isForwardArrayCopy
       TR::Node::recreate(node, TR::arraycopy);
 
-      if (!comp()->generateArraylets())
+      if (!TR::Compiler->om.canGenerateArraylets())
          {
          // -------------------------------------------------------------------
          // Calculate source address node
