@@ -1606,7 +1606,7 @@ bool OMR::Compilation::generateArraylets()
    {
    if (TR::Compiler->om.canGenerateArraylets())
       {
-      return TR::Compiler->om.useHybridArraylets() ? false : true;
+      return true;
       }
    else
       {
