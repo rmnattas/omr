@@ -529,3 +529,92 @@ OMR::TransformUtil::generateArrayOffsetTrees(TR::Compilation *comp, TR::Node *in
 
    return offsetNode;
    }
+
+#if defined (OMR_GC_SPARSE_HEAP_ALLOCATION)
+// When passing an array to Unsafe methods while using off-heap
+// adjustment may be needed to get the target address
+// Assumes arrayBaseOffset() returns 0 during off-heap
+//
+TR::Node *
+OMR::TransformUtil::generateUnsafeArrayTargetAddressForOffheap(TR::Compilation *comp, TR::Node *arrayObject, TR::Node *offsetNode)
+   {
+   // either object is known or not
+   // if known then fast path
+   // if not then arrayCHK or null
+
+   TR::TreeTop *tt = arrayObject->getTreeTop();
+
+   TR_ASSERT_FATAL_WITH_NODE(arrayObject,
+      TR::Compiler->om.isOffHeapAllocationEnabled(),
+      "This helper shouldn't be called if off heap allocation is disabled.\n");
+
+   if (arrayObject->isNull())
+      return offsetNode;
+
+
+   int objSigLength;
+   const char *objTypeSig = arrayObject->getSymbolReference()->getTypeSignature(objSigLength);
+   bool nullCheckNeeded = true;
+   bool arrayCheckNeeded = (objTypeSig == NULL || strncmp(objTypeSig, "Ljava/lang/Object;", strlen("Ljava/lang/Object;")) == 0);
+   bool adjustmentNeeded = objectCheckNeeded || objTypeSig[0] == '[';
+
+   TR::TreeTop *currTT = node->getTreeTop();
+   TR::Block *currBlock = node->getBlock();
+   TR::Block *prevBlock = currBlock->getEntry()->getPrevTreeTop()->getEnclosingBlock();
+   TR::Block *nextBlock = currBlock->getExit()->getNextTreeTop()->getEnclosingBlock();
+   TR::Block *nullBlock = TR::Block::createEmptyBlock(node, comp(), currBlock->getFrequency()/2);
+   TR::Block *fallBlock = TR::Block::createEmptyBlock(node, comp(), currBlock->getFrequency()/2);
+   TR::Block *callBlock = TR::Block::createEmptyBlock(node, comp(), currBlock->getFrequency());
+
+   TR::Node *targetNode;
+   TR::SymbolReference *targetRef;
+
+   if (nullCheckNeeded)
+      {
+
+      // Generate path for if arrayObject is null
+      TR::Node *nullNode = TR::Node::create(TR::aconst, 0);
+      nullNode->setAddress((uintptr_t)0);
+      TR::Node *cmpNode = TR::Node::createif(TR::ificmpeq, arrayObject, nullNode, nullBlock->getEntry());
+      node->insertBefore(cmpNode);
+      fallBlock->getEntry()->setPrevTreeTop(currBlock->getExit());
+      currBlock->getExit()->setNextTreeTop(fallBlock->getEntry());
+
+      TR::Node *dataAddrNode = J9::TransformUtil::generateDataAddrLoadTrees(comp(), arrayObject);
+      targetNode = TR::Node::create(TR::aladd, 2, dataAddrNode, offsetNode);
+      TR::TreeTop *storeTree = targetNode->createStoresForVar(targetRef, fallBlock->getExit());
+      fallBlock->append(storeTree);
+      TR::Node *gotoNode = TR::Node::create(node, TR::Goto, 0, callBlock->getEntry())
+      fallBlock->append(gotoNode);
+      nullBlock->getEntry()->setPrevTreeTop(fallBlock->getExit());
+      fallBlock->getExit()->setNextTreeTop(nullBlock->getEntry());
+
+      // Create block to handle if array is null
+      targetNode = offsetNode;
+      TR::TreeTop *nullStoreTree = targetNode->createStoresForVar(targetRef, nullBlock->getExit()->getNode());
+      nullBlock->append(nullStoreTree);
+      nullBlock->getExit()->setNextTreeTop(callBlock->getEntry());
+      callBlock->getEntry()->setPrevTreeTop(nullBlock->getExit());
+
+      node->setBlock(callBlock);
+      nextBlock->getEntry()->setPrevTreeTop(callBlock->getExit());
+      callBlock->getExit()->setNextTreeTop(nextBlock->getEntry());
+
+      }
+
+   // if (false && adjustmentNeeded)
+   //    {
+   //    TR::Node *dataAddrNode = J9::TransformUtil::generateDataAddrLoadTrees(comp(), arrayObject);
+   //    targetNode = TR::Node::create(TR::aladd, 2, dataAddrNode, offsetNode);
+   //    storeTree = targetNode->createStoresForVar(targetRef, fallBlock->getExit());
+   //    nullBlock->getEntry()->setPrevTreeTop(currBlock->getExit());
+   //    nullBlock->getExit()->setNextTreeTop(nextBlock->getEntry());
+   //    currBlock->getExit()->setNextTreeTop(nullBlock->getEntry());
+   //    nextBlock->getEntry()->setPrevTreeTop(nullBlock->getExit());
+   //    }
+
+   loadNode = TR::Node::createLoad(arrayObject, targetRef);
+   return loadNode;
+
+   }
+#endif /* OMR_GC_SPARSE_HEAP_ALLOCATION */

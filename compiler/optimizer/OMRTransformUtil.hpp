@@ -273,6 +273,8 @@ class OMR_EXTENSIBLE TransformUtil
       int32_t elementSize = 0,
       bool useShiftOpCode = false);
 
+  static TR::Node *generateUnsafeArrayTargetAddressForOffheap(TR::Compilation *comp, TR::Node *arrayObject, TR::Node *offsetNode)
+
    private:
 
    static uint32_t _widthToShift[];
