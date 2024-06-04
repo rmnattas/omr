@@ -289,10 +289,6 @@ OMR::Z::CodeGenerator::lowerTreeIfNeeded(
       TR::Node* base = NULL;
       TR::Node* index = NULL;
       TR::ILOpCodes addOp, subOp, constOp;
-      // Need to track if lowered trees are internal pointers
-      // For context: https://github.com/eclipse/omr/issues/4929
-      bool isInternalPointer = false;
-      TR::AutomaticSymbol *pinningArrayPointer = NULL;
 
       if (self()->comp()->target().is64Bit())
          {
@@ -308,33 +304,14 @@ OMR::Z::CodeGenerator::lowerTreeIfNeeded(
          }
 
       if (node->getFirstChild()->getOpCodeValue() == addOp)
-         {
          add1 = node->getFirstChild();
-         if (add1->isInternalPointer())
-            {
-            isInternalPointer = true;
-            pinningArrayPointer = add1->getPinningArrayPointer();
-            }
-         }
       if (add1 && add1->getFirstChild()->getOpCodeValue() == addOp)
          {
          add2 = add1->getFirstChild();
          base = add2->getFirstChild();
-         if (add2->isInternalPointer())
-            {
-            isInternalPointer = true;
-            pinningArrayPointer = add2->getPinningArrayPointer();
-            }
          }
       if (add1 && add1->getSecondChild()->getOpCodeValue() == subOp)
-         {
          sub = add1->getSecondChild();
-         if (add1->isInternalPointer())
-            {
-            isInternalPointer = true;
-            pinningArrayPointer = add1->getPinningArrayPointer();
-            }
-         }
       if (add2 && add2->getSecondChild()->getOpCode().isLoadConst())
          {
          const1 = add2->getSecondChild();
@@ -353,11 +330,6 @@ OMR::Z::CodeGenerator::lowerTreeIfNeeded(
             index = add2->getSecondChild();
             add2 = add2->getFirstChild();
             base = add2->getFirstChild();
-            if (add2->isInternalPointer())
-               {
-               isInternalPointer = true;
-               pinningArrayPointer = add2->getPinningArrayPointer();
-               }
             if (add2->getSecondChild()->getOpCode().isLoadConst())
                const2 = add2->getSecondChild();
             if (const2 && add1->getSecondChild()->getOpCode().isLoadConst())
@@ -391,13 +363,6 @@ OMR::Z::CodeGenerator::lowerTreeIfNeeded(
 
          TR::Node* newAdd2 = TR::Node::create(addOp, 2, base, index);
          TR::Node* newConst = TR::Node::create(constOp, 0);
-         if (isInternalPointer)
-            {
-            newAdd2->setIsInternalPointer(true);
-            if (pinningArrayPointer)
-               newAdd2->setPinningArrayPointer(pinningArrayPointer);
-            }
-
          if (self()->comp()->target().is64Bit())
             newConst->setLongInt(offset);
          else
