@@ -5049,8 +5049,7 @@ OMR::Node::hasArrayStride()
 bool
 OMR::Node::hasPinningArrayPointerInNodeExtension()
    {
-   int extensionElemNum = _unionBase._extension.getNumElems();
-   return (extensionElemNum >= 6 && self()->getPinningArrayPointer() != NULL);
+   return self()->isDataAddrPointer();
    }
 
 bool
