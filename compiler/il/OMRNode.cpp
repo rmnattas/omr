@@ -215,7 +215,7 @@ OMR::Node::Node(TR::Node *originatingByteCodeNode, TR::ILOpCodes op, uint16_t nu
        + self()->hasBranchDestinationNode()
        + self()->hasBlock()
        + self()->hasArrayStride()
-       + self()->hasPinningArrayPointer() && !self()->supportsPinningArrayPointerInNodeExtension()
+       + (self()->hasPinningArrayPointer() && !self()->supportsPinningArrayPointerInNodeExtension())
        + self()->hasDataType() <= 1,
          "_unionPropertyA union is not disjoint for this node %s (%p):\n"
          "  has({SymbolReference, ...}, ..., DataType) = ({%1d,%1d},%1d,%1d,%1d,%1d,%1d)\n",
@@ -225,7 +225,7 @@ OMR::Node::Node(TR::Node *originatingByteCodeNode, TR::ILOpCodes op, uint16_t nu
          self()->hasBranchDestinationNode(),
          self()->hasBlock(),
          self()->hasArrayStride(),
-         self()->hasPinningArrayPointer() && !self()->supportsPinningArrayPointerInNodeExtension(),
+         (self()->hasPinningArrayPointer() && !self()->supportsPinningArrayPointerInNodeExtension()),
          self()->hasDataType());
    }
 
