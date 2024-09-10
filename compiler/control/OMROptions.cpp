@@ -2641,6 +2641,8 @@ OMR::Options::jitPreProcess()
    if (TR::Compiler->om.isOffHeapAllocationEnabled())
       {
       // Disable opts known to be broken for off heap
+      self()->setOption(TR_DisableUnsafe);
+      _disabledOptimizations[unsafeFastPath] = true;
       _disabledOptimizations[escapeAnalysis] = true;
       _disabledOptimizations[idiomRecognition] = true;
       }
