@@ -3462,6 +3462,7 @@ bool TR_LoopStrider::reassociateAndHoistComputations(TR::Block *loopInvariantBlo
             //node->getSymbolReference()->getSymbol()->isAuto() &&
             node->getSymbolReference()->getSymbol()->isAutoOrParm() &&
             _neverWritten->get(node->getSymbolReference()->getReferenceNumber()))) &&
+           !originalNode->getFirstChild()->isDataAddrPointer() && // Disable storing dataAddr in temps OMR/#7560
            (!_registersScarce || (originalNode->getReferenceCount() > 1)) &&
            (comp()->getSymRefTab()->getNumInternalPointers() < maxInternalPointers()) &&
            (!comp()->cg()->canBeAffectedByStoreTagStalls() ||
@@ -3672,7 +3673,8 @@ bool TR_LoopStrider::reassociateAndHoistComputations(TR::Block *loopInvariantBlo
     * If first child of originalNode is not dataAddr pointer we have already
     * hoisted the array aload, no need to do it again.
     */
-   if (TR::Compiler->om.isOffHeapAllocationEnabled() && originalNode && originalNode->getFirstChild()->isDataAddrPointer())
+   if (false && // Disable storing dataAddr in temps OMR/#7560
+      TR::Compiler->om.isOffHeapAllocationEnabled() && originalNode && originalNode->getFirstChild()->isDataAddrPointer())
       {
       if ((isInternalPointer &&
             (comp()->getSymRefTab()->getNumInternalPointers() < maxInternalPointers())) &&
