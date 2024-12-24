@@ -2209,6 +2209,10 @@ bool TR_CompactNullChecks::replacePassThroughIfPossible(TR::Node *currentNode, T
          if (opCode.isCallIndirect() && opCode.hasSymbolReference() && currentNode->getSymbol()->castToMethodSymbol()->isComputed())
             canCompact = false;
 
+         // Replacing PassThrough with a dataAddrPtr load changes the target of the NULLCHK from obj to dataAddr
+         if (currentNode->isDataAddrPointer()) 
+            canCompact = false;
+
          if (canCompact &&
             performTransformation(comp(), "%sCompact null check %p with node %p in next tree\n", optDetailString(), prevNode, currentNode))
             {
