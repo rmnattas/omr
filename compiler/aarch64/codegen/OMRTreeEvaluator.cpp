@@ -6101,6 +6101,15 @@ OMR::ARM64::TreeEvaluator::aloadEvaluator(TR::Node *node, TR::CodeGenerator *cg)
    TR::Compilation *comp = cg->comp();
    TR::Register *tempReg;
 
+#if defined(OMR_GC_SPARSE_HEAP_ALLOCATION)
+   if (TR::Compiler->om.isOffHeapAllocationEnabled() && node->isDataAddrPointer())
+      {
+      tempReg = cg->allocateRegister();
+      tempReg->setContainsInternalPointer();
+      tempReg->setPinningArrayPointer(node->getPinningArrayPointer());
+      }
+   else
+#endif /* OMR_GC_SPARSE_HEAP_ALLOCATION */
    if (!node->getSymbolReference()->getSymbol()->isInternalPointer())
       {
       if (node->getSymbolReference()->getSymbol()->isNotCollected())

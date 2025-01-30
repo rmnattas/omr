@@ -2760,6 +2760,15 @@ TR::Register *OMR::Power::TreeEvaluator::aloadEvaluator(TR::Node *node, TR::Code
 
    TR::Register *trgReg;
 
+#if defined(OMR_GC_SPARSE_HEAP_ALLOCATION)
+   if (TR::Compiler->om.isOffHeapAllocationEnabled() && node->isDataAddrPointer())
+      {
+      trgReg = cg->allocateRegister();
+      trgReg->setContainsInternalPointer();
+      trgReg->setPinningArrayPointer(node->getPinningArrayPointer());
+      }
+   else
+#endif /* OMR_GC_SPARSE_HEAP_ALLOCATION */
    if (!node->getSymbolReference()->getSymbol()->isInternalPointer())
       {
       if (node->getSymbolReference()->getSymbol()->isNotCollected())

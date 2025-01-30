@@ -605,6 +605,14 @@ TR::Register *OMR::X86::TreeEvaluator::aloadEvaluator(TR::Node *node, TR::CodeGe
       TR::TreeEvaluator::generateVFTMaskInstruction(node, reg, cg);
 #endif
 
+#if defined(OMR_GC_SPARSE_HEAP_ALLOCATION)
+   if (TR::Compiler->om.isOffHeapAllocationEnabled() && node->isDataAddrPointer())
+      {
+      reg->setContainsInternalPointer();
+      reg->setPinningArrayPointer(node->getPinningArrayPointer());
+      }
+   else
+#endif /* OMR_GC_SPARSE_HEAP_ALLOCATION */
    if (node->getSymbolReference()->getSymbol()->isNotCollected())
       {
       if (node->getSymbolReference()->getSymbol()->isInternalPointer())
