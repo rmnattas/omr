@@ -448,6 +448,7 @@ OMR::TransformUtil::generateDataAddrLoadTrees(TR::Compilation *comp, TR::Node *a
    TR::SymbolReference *dataAddrFieldOffset = comp->getSymRefTab()->findOrCreateContiguousArrayDataAddrFieldShadowSymRef();
    TR::Node *dataAddrField = TR::Node::createWithSymRef(TR::aloadi, 1, arrayObject, 0, dataAddrFieldOffset);
    dataAddrField->setIsInternalPointer(true);
+   dataAddrField->setPinningArrayPointer(arrayObject->getSymbolReference()->getSymbol()->castToAutoSymbol());
 
    return dataAddrField;
    }
