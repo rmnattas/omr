@@ -2635,6 +2635,8 @@ OMR::Options::jitPreProcess()
       // Disable opts known to be broken for off heap
       _disabledOptimizations[escapeAnalysis] = true;
       _disabledOptimizations[idiomRecognition] = true;
+      self()->setOption(TR_DisableVectorBCD);
+      self()->setOption(TR_DisablePackedDecimalIntrinsics);
       }
 #endif
 
