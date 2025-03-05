@@ -1073,7 +1073,29 @@ void OMR::ValuePropagation::mergeStoreRelationships(ValueConstraint *fromvc, Val
          // Merge the relationship lists
          //
          ///traceMsg(comp(), "before merge inBothLists %d isFromEmpty %d isToEmpty %d\n", inBothLists, fromRel->isEmpty(), toRel->isEmpty());
+         if (trace())
+            {
+            traceMsg(comp(), "AA1: Merging v%d and v%d: %i\n", fromvc->getValueNumber(),tovc->getValueNumber());
+               traceMsg(comp(), "Attempting merge from: ");
+               if((fromvc != NULL) && (fromvc->relationships.getFirst() != NULL))
+                  fromvc->relationships.getFirst()->print(this);
+               traceMsg(comp(), "\n           merge To: ");
+               if((tovc != NULL) && (tovc->relationships.getFirst() != NULL))
+                  tovc->relationships.getFirst()->print(this);
+               traceMsg(comp(), "\n");
+            }
          mergeRelationships(*fromRel, *toRel, valueNumber, preserve, prev /*mergingStore*/, &storeSymbols, inBothLists);
+         if (trace())
+            {
+            traceMsg(comp(), "AA1: After merging v%d and v%d: %i\n", fromvc->getValueNumber(),tovc->getValueNumber());
+               traceMsg(comp(), "Attempting merge from: ");
+               if((fromvc != NULL) && (fromvc->relationships.getFirst() != NULL))
+                  fromvc->relationships.getFirst()->print(this);
+               traceMsg(comp(), "\n           merge To: ");
+               if((tovc != NULL) && (tovc->relationships.getFirst() != NULL))
+                  tovc->relationships.getFirst()->print(this);
+               traceMsg(comp(), "\n");
+            }
          }
       }
    }
@@ -1082,8 +1104,30 @@ void OMR::ValuePropagation::mergeValueConstraints(ValueConstraint *fromvc, Value
    {
    // First merge the non-store relationships.
    //
+   if (trace())
+      {
+      traceMsg(comp(), "AA2: Merging v%d and v%d: %i\n", fromvc->getValueNumber(),tovc->getValueNumber());
+               traceMsg(comp(), "Attempting merge from: ");
+               if((fromvc != NULL) && (fromvc->relationships.getFirst() != NULL))
+                  fromvc->relationships.getFirst()->print(this);
+               traceMsg(comp(), "\n           merge To: ");
+               if((tovc != NULL) && (tovc->relationships.getFirst() != NULL))
+                  tovc->relationships.getFirst()->print(this);
+         traceMsg(comp(), "\n");
+      }
    mergeRelationships(fromvc->relationships, tovc->relationships, fromvc->getValueNumber(), preserveFrom);
 
+   if (trace())
+      {
+      traceMsg(comp(), "AA2: After merging v%d and v%d: %i\n", fromvc->getValueNumber(),tovc->getValueNumber());
+               traceMsg(comp(), "Attempting merge from: ");
+               if((fromvc != NULL) && (fromvc->relationships.getFirst() != NULL))
+                  fromvc->relationships.getFirst()->print(this);
+               traceMsg(comp(), "\n           merge To: ");
+               if((tovc != NULL) && (tovc->relationships.getFirst() != NULL))
+                  tovc->relationships.getFirst()->print(this);
+         traceMsg(comp(), "\n");
+      }
    // Now merge the store relationships.
    //
    mergeStoreRelationships(fromvc, tovc, preserveFrom);
