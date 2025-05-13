@@ -3745,7 +3745,7 @@ OMR::Node::createLongIfNeeded()
  * @return the top (first) inserted tree or null
  */
 TR::TreeTop *
-OMR::Node::createStoresForVar(TR::SymbolReference * &nodeRef, TR::TreeTop *insertBefore, bool simpleRef)
+OMR::Node::createStoresForVar(TR::SymbolReference * &nodeRef, TR::TreeTop *insertBefore, bool simpleRef, TR::Node *parentNode)
    {
    TR::Compilation * comp = TR::comp();
    TR::TreeTop *storeTree = NULL;
@@ -3783,7 +3783,18 @@ OMR::Node::createStoresForVar(TR::SymbolReference * &nodeRef, TR::TreeTop *inser
       TR::TreeTop *newStoreTree = TR::TreeTop::create(comp, newStore);
       insertBefore = origInsertBefore->insertBefore(newStoreTree);
       arrayLoadNode = TR::Node::createLoad(firstChild, newArrayRef);
-      self()->setAndIncChild(0, arrayLoadNode);
+      if (parentNode && self()->getReferenceCount() > 1)
+         {
+         TR::Node* newDataAddrNode = self()->duplicateTree(false);
+         newDataAddrNode->setAndIncChild(0, arrayLoadNode);
+         for (int i = 0; i < parentNode->getNumChildren(); i++)
+            {
+            if (self() == parentNode->getChild(i))
+               parentNode->setAndIncChild(i, newDataAddrNode);
+            }
+         }
+      else
+         self()->setAndIncChild(0, arrayLoadNode);
       firstChild->recursivelyDecReferenceCount();
       return insertBefore;
       }
@@ -3915,7 +3926,28 @@ OMR::Node::createStoresForVar(TR::SymbolReference * &nodeRef, TR::TreeTop *inser
 
                   if (child->isDataAddrPointer())
                      {
-                     arrayLoadNode = TR::Node::createLoad(arrayObjectNode, newArrayRef);
+                     //
+                     bool duplicateFlag = false;
+                     TR::Node *oldChild = parentNode;
+                     TR::Node *childIt = self();
+                     while (childIt->getOpCode().isArrayRef())
+                        {
+                        if (duplicateFlag || (oldChild && childIt->getReferenceCount() > 1))
+                           {
+                           duplicateFlag = true;
+                           TR::Node *newChild = childIt->duplicateTree(false);
+                           oldChild->setFirst(newChild);
+                           oldChild = newChild;
+                           childIt = childIt->getFirstChild();
+                           }
+                        else
+                           {
+                           oldChild = childIt;
+                           childIt = childIt->getFirstChild();
+                           }
+                        }
+                     //
+                     arrayLoadNode = TR::Node::createLoad(arrayObjectNode, newArrayRef); 
                      child->setAndIncChild(0, arrayLoadNode);
                      arrayObjectNode->recursivelyDecReferenceCount();
                      }

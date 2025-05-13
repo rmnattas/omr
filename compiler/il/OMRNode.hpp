@@ -665,7 +665,7 @@ public:
 
    TR::Node *             createLongIfNeeded();
 
-   TR::TreeTop *          createStoresForVar(TR::SymbolReference * &nodeRef, TR::TreeTop *insertBefore, bool simpleRef = false);
+   TR::TreeTop *          createStoresForVar(TR::SymbolReference * &nodeRef, TR::TreeTop *insertBefore, bool simpleRef = false, TR::Node *parentNode = NULL);
 
    void                   printFullSubtree();
 
