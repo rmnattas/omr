@@ -1881,6 +1881,28 @@ OMR::Power::Machine::createCondForLiveAndSpilledGPRs(TR::list<TR::Register*> *sp
    }
 
 void
+OMR::Power::Machine::printRegSnapShot()
+   {
+   static const char * stateNames[5] = { "Free", "Unlatched", "Assigned", "Blocked", "Locked" };
+   for (i = TR::RealRegister::FirstGPR; i < TR::RealRegister::NumRegisters - 1; i++) // Skipping SpilledReg
+      {
+      if (i == TR::RealRegister::mq || i == TR::RealRegister::ctr)
+         continue;
+      traceMsg(self()->cg()->comp(),"\nAA: %d=[%s, %s, %s, 0x%x]\n", i, self()->cg()->getDebug()->getName(_registerAssociationsSnapShot[i]), 
+         stateNames[_registerStatesSnapShot[i]], self()->cg()->getDebug()->getName(_assignedRegisterSnapShot[i]), 
+         _registerFlagsSnapShot[i]);
+      }
+      // enum // _flags masks
+      // {
+      // PlaceholderReg                = 0x0001,
+      // ContainsCollectedReference    = 0x0008, // GPR contains a collected reference
+      // IsLive                        = 0x0010, // Register is currently live
+      // ContainsInternalPointer       = 0x0080,
+      // IsSinglePrecision             = 0x0400,
+      // };
+   }
+
+void
 OMR::Power::Machine::takeRegisterStateSnapShot()
    {
    int32_t i;
@@ -1893,6 +1915,8 @@ OMR::Power::Machine::takeRegisterStateSnapShot()
       _assignedRegisterSnapShot[i] = _registerFile[i]->getAssignedRegister();
       _registerFlagsSnapShot[i] = _registerFile[i]->getFlags();
       }
+   if (self()->cg()->comp()->getOption(TR_TraceRA))
+      printRegSnapShot();
    }
 
 void
@@ -1903,6 +1927,13 @@ OMR::Power::Machine::restoreRegisterStateFromSnapShot()
       {
       if (i == TR::RealRegister::mq || i == TR::RealRegister::ctr)
          continue;
+      
+      static const char * stateNames[5] = { "Free", "Unlatched", "Assigned", "Blocked", "Locked" }; 
+      if (self()->cg()->comp()->getOption(TR_TraceRA))
+         traceMsg(self()->cg()->comp(),"\nAA: %d=[%s, %s, %s, 0x%x]\n", i, self()->cg()->getDebug()->getName(_registerAssociationsSnapShot[i]), 
+         stateNames[_registerStatesSnapShot[i]], self()->cg()->getDebug()->getName(_assignedRegisterSnapShot[i]), 
+         _registerFlagsSnapShot[i]);
+
       _registerFile[i]->setFlags(_registerFlagsSnapShot[i]);
       _registerFile[i]->setState(_registerStatesSnapShot[i]);
       if (_registerAssociationsSnapShot[i])
