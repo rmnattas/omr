@@ -731,12 +731,13 @@ void OMR::TreeEvaluator::evaluateNodesWithFutureUses(TR::Node *node, TR::CodeGen
          actualLoadOrStoreChild->getOpCode().isLoadConst() ||
          actualLoadOrStoreChild->getOpCode().isArrayRef() ||
          (actualLoadOrStoreChild->getOpCode().isLoad() &&
+         !actualLoadOrStoreChild->getRegister() &&
          actualLoadOrStoreChild->getSymbolReference() &&
             (actualLoadOrStoreChild->getSymbolReference()->getSymbol()->isArrayShadowSymbol() ||
             actualLoadOrStoreChild->getSymbolReference()->getSymbol()->isArrayletShadowSymbol())))
          {
          // These types of nodes are likey specific to one path or another and may cause
-         // a failure if evaluated on a common path.
+         // a failure if evaluated on a common path. Except array accesses if already evaluated.
          //
          if (comp->getOption(TR_TraceCG))
             {
