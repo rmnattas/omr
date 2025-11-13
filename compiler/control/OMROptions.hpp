@@ -1449,6 +1449,7 @@ public:
         _tryToInline = NULL;
         _slipTrap = NULL;
         _lockReserveClass = NULL;
+        _glrBlocklist = NULL;
         _breakOnOpts = NULL;
         _breakOnCreate = NULL;
         _debugOnCreate = NULL;
@@ -1870,6 +1871,8 @@ public:
     TR::SimpleRegex *getSlipTrap() { return _slipTrap; }
 
     TR::SimpleRegex *getLockReserveClass() { return _lockReserveClass; }
+
+    TR::SimpleRegex * getGLRBlocklist() {return _glrBlocklist; }
 
     TR::SimpleRegex *getBreakOnCreate() { return _breakOnCreate; }
 
@@ -2685,6 +2688,7 @@ protected:
     TR::SimpleRegex *_tryToInline;
     TR::SimpleRegex *_slipTrap;
     TR::SimpleRegex *_lockReserveClass;
+    TR::SimpleRegex *_glrBlocklist;
     TR::SimpleRegex *_breakOnOpts;
     TR::SimpleRegex *_breakOnCreate;
     TR::SimpleRegex *_debugOnCreate;
