@@ -1471,6 +1471,13 @@ TR::SymbolReference *OMR::SymbolReferenceTable::findOrCreateAutoSymbolImpl(TR::R
                              comp()->fe())
                        : TR::AutomaticSymbol::createInternalPointer(trHeapMemory(), type);
             _numInternalPointers++;
+            if (feGetEnv("AATraceIP") != NULL){
+                OMR::Logger *log = comp()->log();
+                log->printf("AA: new sym: 0x%08X\n", sym);
+                log->printf("AA: _numInternalPointers=%d, maxInternalPointers=%d\n", _numInternalPointers, comp()->maxInternalPointers());
+                log->printf("AA: TR_Server:%d\n", comp()->getOptions()->getOption(TR_Server)?1:0);
+                log->printf("AA: getNumLoadedClasses:%d\n", comp()->getPersistentInfo()->getNumLoadedClasses());
+            }
             if (_numInternalPointers > comp()->maxInternalPointers()) {
                 comp()->failCompilation<TR::ExcessiveComplexity>("Excessive number of internal pointers");
             }
