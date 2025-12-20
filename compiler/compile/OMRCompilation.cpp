@@ -354,7 +354,7 @@ OMR::Compilation::Compilation(int32_t id, OMR_VMThread *omrVMThread, TR_FrontEnd
     // CodeGenerator's _disableInternalPointers member is set in its constructor and this is one of
     // options that is checked for
     if (_isOptServer) {
-        if (self()->getMethodHotness() <= warm) {
+        if (self()->getMethodHotness() <= warm && (feGetEnv("AA_AllowServerIP")==NULL)) {
             self()->setOption(TR_DisableInternalPointers);
         }
     }

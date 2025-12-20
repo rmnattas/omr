@@ -3353,7 +3353,11 @@ TR::TreeTop *OMR::Node::createStoresForVar(TR::SymbolReference *&nodeRef, TR::Tr
             TR::TreeTop *newStoreTree = TR::TreeTop::create(comp, newStore);
             insertBefore = origInsertBefore->insertBefore(newStoreTree);
             arrayLoadNode = TR::Node::createLoad(firstChild, newArrayRef);
-            arrayLoadNode = TR::TransformUtil::generateDataAddrLoadTrees(comp(), arrayLoadNode);
+            // arrayLoadNode = TR::TransformUtil::generateDataAddrLoadTrees(comp, arrayLoadNode);
+            TR::SymbolReference *dataAddrFieldOffset
+                = comp->getSymRefTab()->findOrCreateContiguousArrayDataAddrFieldShadowSymRef();
+            arrayLoadNode = TR::Node::createWithSymRef(TR::aloadi, 1, arrayLoadNode, 0, dataAddrFieldOffset);
+            arrayLoadNode->setIsInternalPointer(true);
          } else
             storesNeedToBeCreated = true;
 
