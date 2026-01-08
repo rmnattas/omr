@@ -849,7 +849,7 @@ bool OMR::ValuePropagation::canRunTransformToArrayCopy()
 bool OMR::ValuePropagation::transformUnsafeCopyMemoryCall(TR::Node *arrayCopyNode) { return false; }
 
 void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
-{
+{ 
     OMR::Logger *log = comp()->log();
     bool is64BitTarget = comp()->target().is64Bit();
 
@@ -1292,7 +1292,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
 
     if (transformTheCall
         && performTransformation(comp(), "%sChanging call %s [%p] to arraycopy\n", OPT_DETAILS,
-            node->getOpCode().getName(), node)) {
+            node->getOpCode().getName(), node)) { 
         TR::ResolvedMethodSymbol *methodSymbol = comp()->getMethodSymbol();
 
 #ifdef J9_PROJECT_SPECIFIC
@@ -1360,9 +1360,10 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
             TR::SymbolReference *dstArrRefSymRef = NULL;
             TR::SymbolReference *srcArrRefSymRef = NULL;
 
+            if (feGetEnv("AATraceIP") != NULL) comp()->dumpMethodTrees(log, "AA: Trees before temp childs");
             // Create temporaries for System.arraycopy arguments and replace the children of the new call node with the
             // temps
-            for (int32_t i = 0; i < oldCallNode->getNumChildren(); ++i) {
+            for (int32_t i = 0; i < oldCallNode->getNumChildren(); ++i) { 
                 TR::Node *child = oldCallNode->getChild(i);
 
                 TR::Node *value = NULL;
@@ -1398,6 +1399,9 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
                 newCallNode->getChild(i)->recursivelyDecReferenceCount();
                 newCallNode->setAndIncChild(i, value);
             }
+
+            if (feGetEnv("AATraceIP") != NULL)
+                comp()->dumpMethodTrees(log, "AA: Trees after temp childs");
 
             // prevTT is required so that we can insert runtime array component type check after prevTT
             TR::TreeTop *prevTT = _curTree->getPrevTreeTop();
@@ -1456,6 +1460,8 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
         TR::Node *src = NULL, *dst = NULL, *len = NULL;
 
         bool isStringFwdArrayCopy = false;
+
+        if (feGetEnv("AATraceIP") != NULL) comp()->dumpMethodTrees(log, "AA: 1");
 
         if (!canSkipAllChecksOnArrayCopy) {
             // -------------------------------------------------------------------
@@ -1586,6 +1592,8 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
             }
         }
 
+        if (feGetEnv("AATraceIP") != NULL) comp()->dumpMethodTrees(log, "AA: 2");
+
         if (srcArrayLength) {
             int32_t stride = 0;
 
@@ -1613,6 +1621,8 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
             if (stride != 0)
                 dstArrayLength->setArrayStride(stride);
         }
+
+        if (feGetEnv("AATraceIP") != NULL) comp()->dumpMethodTrees(log, "AA: 3");
 
         // -------------------------------------------------------------------
         // Process the newly-inserted trees
@@ -1642,6 +1652,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
             return;
         }
 
+        if (feGetEnv("AATraceIP") != NULL) comp()->dumpMethodTrees(log, "AA: 4");
         // -------------------------------------------------------------------
         // The arraycopy transformation will proceed assuming the array is
         // contiguous.
@@ -1708,6 +1719,8 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
         //    whether the copy must be a forward copy
         //    whether the arrays are known to be reference arrays
         //
+
+        if (feGetEnv("AATraceIP") != NULL) comp()->dumpMethodTrees(log, "AA: 5");
 
         TR::Node *hdrSize = createHdrSizeNode(comp(), node);
 
@@ -1788,6 +1801,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
             }
         }
 
+        if (feGetEnv("AATraceIP") != NULL) comp()->dumpMethodTrees(log, "AA: 6");
         // -------------------------------------------------------------------
         // Arraycopy length node
         // -------------------------------------------------------------------
@@ -1796,6 +1810,8 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
             node, elementSize, stride ? stride->getGlobalIndex() : -1, stride);
 
         len = generateLenForArrayCopy(comp(), elementSize, stride, srcObjNode, copyLenNode, node);
+
+        if (feGetEnv("AATraceIP") != NULL) comp()->dumpMethodTrees(log, "AA: 7");
 
         if (primitiveArray1 || primitiveArray2) {
             // Must be a simple byte copy.
@@ -1853,6 +1869,7 @@ void OMR::ValuePropagation::transformArrayCopyCall(TR::Node *node)
                 && ((srcOffHigh + copyLenHigh) <= dstOffLow)))
             node->setForwardArrayCopy(true);
 
+        if (feGetEnv("AATraceIP") != NULL) comp()->dumpMethodTrees(log, "AA: 8");
         // -------------------------------------------------------------------
         // Check and transform the existing array copy node to a primitive
         // arraycopy if neither an arraystore check nor a write barrier are
