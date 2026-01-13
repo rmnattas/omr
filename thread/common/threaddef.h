@@ -482,6 +482,12 @@ enum {
 				UPDATE_JLM_MON_ENTER_HOLD_TIMES((self), (monitor)); \
 			} \
 		} \
+		char * monitorName = omrthread_monitor_get_name(monitor); \
+		if (getenv("AA_TraceTFMon3")){ \
+			if (monitorName && strncmp(monitorName,"Thread public flags mutex",strlen("Thread public flags mutex"))==0){ \
+				fprintf(stderr, "AA_TraceTFMon3: Acquire monitor 0x%p by thread 0x%p tid=0x%x\n", monitor, self, (int)self->tid); \
+			} \
+		} \
 	} while (0)
 #else /* OMR_THR_JLM */
 #define UPDATE_JLM_MON_ENTER(self, monitor, isRecursiveEnter, isSlowEnter)

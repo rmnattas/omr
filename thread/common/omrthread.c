@@ -3992,6 +3992,13 @@ monitor_enter_three_tier(omrthread_t self, omrthread_monitor_t monitor, BOOLEAN 
 	ASSERT(monitor->owner != self);
 	ASSERT(FREE_TAG != monitor->count);
 
+	char * monitorName = omrthread_monitor_get_name(monitor);
+	if (getenv("AA_TraceTFMon")){
+		if (monitorName && strncmp(monitorName,"Thread public flags mutex",strlen("Thread public flags mutex"))==0){
+			fprintf(stderr, "AA_TraceTFMon: Acquire monitor 0x%p by thread 0x%p tid=0x%x\n", monitor, self, (int)self->tid);
+		}
+	}
+
 	while (1) {
 #if defined(OMR_THR_MCS_LOCKS)
 		if (0 == omrthread_mcs_lock(self, monitor, mcsNode, (blockedCount != 0)))
@@ -4107,7 +4114,7 @@ monitor_enter_three_tier(omrthread_t self, omrthread_monitor_t monitor, BOOLEAN 
 		THREAD_UNLOCK(self);
 	}
 
-	UPDATE_JLM_MON_ENTER(self, monitor, !IS_RECURSIVE_ENTER, (blockedCount > 0));
+	UPDATE_JLM_MON_ENTER(self, monitor, !IS_RECURSIVE_ENTER, (blockedCount > 0)); 
 
 	ASSERT(!(self->flags & J9THREAD_FLAG_BLOCKED));
 	ASSERT(0 == self->monitor);
@@ -4194,7 +4201,7 @@ omrthread_monitor_try_enter(omrthread_monitor_t monitor)
  */
 intptr_t
 omrthread_monitor_try_enter_using_threadId(omrthread_monitor_t monitor, omrthread_t threadId)
-{
+{ 
 	intptr_t lockAcquired = -1;
 #if defined(OMR_THR_MCS_LOCKS)
 	omrthread_mcs_node_t mcsNode = NULL;
@@ -4203,6 +4210,13 @@ omrthread_monitor_try_enter_using_threadId(omrthread_monitor_t monitor, omrthrea
 	ASSERT(threadId == MACRO_SELF());
 	ASSERT(monitor);
 	ASSERT(FREE_TAG != monitor->count);
+
+	char * monitorName = omrthread_monitor_get_name(monitor);
+	if (getenv("AA_TraceTFMon")){
+		if (monitorName && strncmp(monitorName,"Thread public flags mutex",strlen("Thread public flags mutex"))==0){
+			fprintf(stderr, "AA_TraceTFMon2: Acquire monitor 0x%p by thread 0x%p tid=0x%x\n", monitor, threadId, (int)threadId->tid);
+		}
+	}
 
 	/* Are we already the owner? */
 	if (monitor->owner == threadId) {
@@ -4237,7 +4251,7 @@ omrthread_monitor_try_enter_using_threadId(omrthread_monitor_t monitor, omrthrea
 
 		threadId->lockedmonitorcount++;
 
-		UPDATE_JLM_MON_ENTER(threadId, monitor, !IS_RECURSIVE_ENTER, !IS_SLOW_ENTER);
+		UPDATE_JLM_MON_ENTER(threadId, monitor, !IS_RECURSIVE_ENTER, !IS_SLOW_ENTER); 
 
 		return 0;
 	}
