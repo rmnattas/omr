@@ -3345,7 +3345,16 @@ TR::TreeTop *OMR::Node::createStoresForVar(TR::SymbolReference *&nodeRef, TR::Tr
             insertBefore = origInsertBefore->insertBefore(newStoreTree);
 
             arrayLoadNode = TR::Node::createLoad(firstChild, newArrayRef);
-        } else
+         } else if (!firstChild->getOpCode().isArrayRef() && firstChild->isDataAddrPointer()) {
+            TR::SymbolReference *newArrayRef
+                = comp->getSymRefTab()->createTemporary(comp->getMethodSymbol(), TR::Address);
+
+            TR::Node *newStore = TR::Node::createStore(newArrayRef, firstChild->getFirstChild());
+            TR::TreeTop *newStoreTree = TR::TreeTop::create(comp, newStore);
+            insertBefore = origInsertBefore->insertBefore(newStoreTree);
+            arrayLoadNode = TR::Node::createLoad(firstChild, newArrayRef);
+            arrayLoadNode = TR::TransformUtil::generateDataAddrLoadTrees(comp(), arrayLoadNode);
+         } else
             storesNeedToBeCreated = true;
 
         if (!storesNeedToBeCreated) {
