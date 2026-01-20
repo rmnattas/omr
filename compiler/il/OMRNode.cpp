@@ -3357,7 +3357,7 @@ TR::TreeTop *OMR::Node::createStoresForVar(TR::SymbolReference *&nodeRef, TR::Tr
             TR::TreeTop *newStoreTree = TR::TreeTop::create(comp, newStore);
             insertBefore = origInsertBefore->insertBefore(newStoreTree);
             arrayLoadNode = TR::Node::createLoad(firstChild, newArrayRef);
-            arrayLoadNode = TR::TransformUtil::generateDataAddrLoadTrees(comp(), arrayLoadNode);
+            arrayLoadNode = TR::TransformUtil::generateDataAddrLoadTrees(comp, arrayLoadNode);
         } else
             storesNeedToBeCreated = true;
 
