@@ -3346,10 +3346,10 @@ TR::TreeTop *OMR::Node::createStoresForVar(TR::SymbolReference *&nodeRef, TR::Tr
     }
 
     if (isInternalPointer && self()->getOpCode().isArrayRef()
-        && (dontUseInternalPointers
-            || comp->getSymRefTab()->getNumInternalPointers() >= (comp->maxInternalPointers() / 2)
-            || comp->cg()->supportsComplexAddressing())
-        && (self()->getReferenceCount() == 1)) {
+        && ((comp->getSymRefTab()->getNumInternalPointers() >= (comp->maxInternalPointers() / 2)
+                || comp->cg()->supportsComplexAddressing())
+            && (self()->getReferenceCount() == 1)
+        || dontUseInternalPointers)) {
         storesNeedToBeCreated = false;
         TR::Node *firstChild = self()->getFirstChild();
         TR::Node *secondChild = self()->getSecondChild();
