@@ -23,6 +23,7 @@
 #define OMR_CRITICALSECTION_INCL
 
 #include <algorithm>
+#include <unistd.h>
 #include "infra/Monitor.hpp"
 
 namespace OMR {
@@ -42,6 +43,7 @@ public:
         : _monitor(monitor)
     {
         _monitor->enter();
+        sleep(1);
     }
 
     /**
@@ -65,7 +67,7 @@ public:
      * @brief Automatically notify the end of the critical section, destroying the OMR::CriticalSection
      * object and exiting the monitor.
      */
-    ~CriticalSection() { _monitor->exit(); }
+    ~CriticalSection() {sleep(1); _monitor->exit(); }
 
     /**
      * @brief Reconcile a given critical section with another, redirecting the monitor
