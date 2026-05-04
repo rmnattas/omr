@@ -37,6 +37,7 @@ if(OMR_ARCH_POWER)
 		p/BinaryEncoder.cpp
 		p/MemoryReferenceExpansion.cpp
 		p/Peephole.cpp
+		p/AllInstructionsTest.cpp
 	)
 endif()
 
