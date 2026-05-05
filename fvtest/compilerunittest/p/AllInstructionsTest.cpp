@@ -219,6 +219,16 @@ TEST_F(PowerAllInstructionsTest, GenerateAllInstructions)
                 instr = generateTrg1Src1Instruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2);
             } else if (format == FORMAT_BF_RA_RB) {
                 instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyCCR, dummyGPR1, dummyGPR2);
+            } else if (format == FORMAT_RT_RA_SI16 || format == FORMAT_RA_SI16) {
+                instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 0x1234);
+            } else if (format == FORMAT_RA_RS_UI16) {
+                instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 0x5678);
+            } else if (format == FORMAT_RT_SI16) {
+                instr = generateTrg1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, 0xABCD);
+            } else if (format == FORMAT_RA_SI5) {
+                instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 15);
+            } else if (format == FORMAT_RA_RS_SH5 || format == FORMAT_RA_RS_SH6) {
+                instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 8);
             } else {
                 // Fallback to general generation
                 instr = generateInstruction(cg(), opcode, fakeNode);
