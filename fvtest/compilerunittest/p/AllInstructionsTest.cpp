@@ -184,7 +184,7 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
     std::vector<TR::Instruction*> generatedInstructions;
     std::vector<TR::InstOpCode::Mnemonic> generatedOpcodes;
     
-    // Create dummy registers for instruction generation
+    // Create dummy registers for instruction generation and assign to real registers
     TR::Register *dummyGPR1 = cg()->allocateRegister(TR_GPR);
     TR::Register *dummyGPR2 = cg()->allocateRegister(TR_GPR);
     TR::Register *dummyGPR3 = cg()->allocateRegister(TR_GPR);
@@ -193,6 +193,16 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
     TR::Register *dummyVRF1 = cg()->allocateRegister(TR_VRF);
     TR::Register *dummyVRF2 = cg()->allocateRegister(TR_VRF);
     TR::Register *dummyCCR = cg()->allocateRegister(TR_CCR);
+    
+    // Assign to real registers for proper printing
+    dummyGPR1->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::gr1));
+    dummyGPR2->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::gr2));
+    dummyGPR3->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::gr3));
+    dummyFPR1->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::fp1));
+    dummyFPR2->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::fp2));
+    dummyVRF1->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::vr1));
+    dummyVRF2->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::vr2));
+    dummyCCR->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::cr0));
     
     // Iterate through all Power opcodes
     for (int i = TR::InstOpCode::bad + 1; i < TR::InstOpCode::NumOpCodes; i++)
