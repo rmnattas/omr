@@ -184,6 +184,16 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
     std::vector<TR::Instruction*> generatedInstructions;
     std::vector<TR::InstOpCode::Mnemonic> generatedOpcodes;
     
+    // Create dummy registers for instruction generation
+    TR::Register *dummyGPR1 = cg()->allocateRegister(TR_GPR);
+    TR::Register *dummyGPR2 = cg()->allocateRegister(TR_GPR);
+    TR::Register *dummyGPR3 = cg()->allocateRegister(TR_GPR);
+    TR::Register *dummyFPR1 = cg()->allocateRegister(TR_FPR);
+    TR::Register *dummyFPR2 = cg()->allocateRegister(TR_FPR);
+    TR::Register *dummyVRF1 = cg()->allocateRegister(TR_VRF);
+    TR::Register *dummyVRF2 = cg()->allocateRegister(TR_VRF);
+    TR::Register *dummyCCR = cg()->allocateRegister(TR_CCR);
+    
     // Iterate through all Power opcodes
     for (int i = TR::InstOpCode::bad + 1; i < TR::InstOpCode::NumOpCodes; i++)
     {
@@ -195,10 +205,25 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
         // Get the format from metadata
         PPCInstructionFormat format = op.getFormat();
         
-        // Use general generateInstruction for all opcodes
+        // Create instruction with appropriate registers based on format
         try
         {
-            instr = generateInstruction(cg(), opcode, fakeNode);
+            // Use format-specific generation for better operand display
+            if (format == FORMAT_RT_RA_RB || format == FORMAT_RA_RS_RB) {
+                instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, dummyGPR3);
+            } else if (format == FORMAT_FRT_FRA_FRB) {
+                instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyFPR1, dummyFPR2, dummyFPR2);
+            } else if (format == FORMAT_VRT_VRA_VRB) {
+                instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyVRF1, dummyVRF2, dummyVRF2);
+            } else if (format == FORMAT_RT_RA || format == FORMAT_RA_RS) {
+                instr = generateTrg1Src1Instruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2);
+            } else if (format == FORMAT_BF_RA_RB) {
+                instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyCCR, dummyGPR1, dummyGPR2);
+            } else {
+                // Fallback to general generation
+                instr = generateInstruction(cg(), opcode, fakeNode);
+            }
+            
             if (instr != nullptr)
             {
                 successCount++;
