@@ -237,13 +237,17 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
     
     // Write all instructions to files
     std::ofstream binaryFile("all_instructions.bin", std::ios::binary);
-    std::ofstream textFile("all_instructions.txt");
+    FILE* textFileHandle = fopen("all_instructions.txt", "w");
     
-    if (binaryFile.is_open() && textFile.is_open())
+    if (binaryFile.is_open() && textFileHandle != nullptr)
     {
         printf("\n=== Writing all instructions to files ===\n");
         printf("Binary file: all_instructions.bin\n");
         printf("Text file: all_instructions.txt\n");
+        
+        // Create a logger for the text file
+        auto textLogger = OMR::CStdIOStreamLogger::create(trHeapMemory, textFileHandle);
+        auto debug = cg()->comp()->getDebug();
         
         for (size_t i = 0; i < generatedInstructions.size(); i++)
         {
@@ -254,8 +258,6 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
             // Get the binary encoding
             uint32_t prefix = op.getMetaData().prefix;
             uint32_t encoding = op.getOpCodeBinaryEncoding();
-            PPCInstructionFormat format = op.getFormat();
-            std::string formatName = getFormatName(format);
             
             // Write binary encoding (big-endian format for Power)
             if (prefix != 0) {
@@ -270,23 +272,15 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
                 binaryFile.write(reinterpret_cast<const char*>(&encodingBE), sizeof(encodingBE));
             }
             
-            // Write human-readable text
-            if (prefix != 0) {
-                textFile << "Opcode " << std::setw(4) << opcode 
-                         << " (" << std::setw(20) << std::left << op.getMnemonicName() << "): "
-                         << "0x" << std::hex << std::setw(8) << std::setfill('0') << prefix
-                         << std::setw(8) << std::setfill('0') << encoding << std::dec
-                         << "  Format: " << formatName << " (Prefixed)\n";
-            } else {
-                textFile << "Opcode " << std::setw(4) << opcode 
-                         << " (" << std::setw(20) << std::left << op.getMnemonicName() << "): "
-                         << "0x" << std::hex << std::setw(8) << std::setfill('0') << encoding << std::dec
-                         << "  Format: " << formatName << "\n";
+            // Write human-readable instruction using TR_Debug
+            if (debug) {
+                debug->print(textLogger, instr);
+                textLogger->println();
             }
         }
         
         binaryFile.close();
-        textFile.close();
+        fclose(textFileHandle);
         printf("Successfully wrote %zu instructions to files\n", generatedInstructions.size());
     }
     else
