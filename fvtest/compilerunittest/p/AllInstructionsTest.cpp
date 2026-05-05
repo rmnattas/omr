@@ -209,29 +209,192 @@ TEST_F(PowerAllInstructionsTest, GenerateAllInstructions)
         try
         {
             // Use format-specific generation for better operand display
-            if (format == FORMAT_RT_RA_RB || format == FORMAT_RA_RS_RB) {
-                instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, dummyGPR3);
-            } else if (format == FORMAT_FRT_FRA_FRB) {
-                instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyFPR1, dummyFPR2, dummyFPR2);
-            } else if (format == FORMAT_VRT_VRA_VRB) {
-                instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyVRF1, dummyVRF2, dummyVRF2);
-            } else if (format == FORMAT_RT_RA || format == FORMAT_RA_RS) {
-                instr = generateTrg1Src1Instruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2);
-            } else if (format == FORMAT_BF_RA_RB) {
-                instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyCCR, dummyGPR1, dummyGPR2);
-            } else if (format == FORMAT_RT_RA_SI16 || format == FORMAT_RA_SI16) {
-                instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 0x1234);
-            } else if (format == FORMAT_RA_RS_UI16) {
-                instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 0x5678);
-            } else if (format == FORMAT_RT_SI16) {
-                instr = generateTrg1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, 0xABCD);
-            } else if (format == FORMAT_RA_SI5) {
-                instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 15);
-            } else if (format == FORMAT_RA_RS_SH5 || format == FORMAT_RA_RS_SH6) {
-                instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 8);
-            } else {
-                // Fallback to general generation
-                instr = generateInstruction(cg(), opcode, fakeNode);
+            switch (format) {
+                // 3-operand GPR formats
+                case FORMAT_RT_RA_RB:
+                case FORMAT_RT_RA_RB_MEM:
+                case FORMAT_RA_RS_RB:
+                    instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, dummyGPR3);
+                    break;
+                
+                // 3-operand FPR formats
+                case FORMAT_FRT_FRA_FRB:
+                case FORMAT_FRT_RA_RB_MEM:
+                    instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyFPR1, dummyFPR2, dummyFPR2);
+                    break;
+                
+                // 3-operand VRF formats
+                case FORMAT_VRT_VRA_VRB:
+                case FORMAT_VRT_RA_RB_MEM:
+                    instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyVRF1, dummyVRF2, dummyVRF2);
+                    break;
+                
+                // 3-operand VSX formats
+                case FORMAT_XT_XA_XB:
+                case FORMAT_XT_RA_RB:
+                case FORMAT_XT_RA_RB_MEM:
+                    instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyVRF1, dummyGPR2, dummyGPR3);
+                    break;
+                
+                // 2-operand GPR formats
+                case FORMAT_RT_RA:
+                case FORMAT_RA_RS:
+                case FORMAT_RA_RB:
+                case FORMAT_RA_RB_MEM:
+                    instr = generateTrg1Src1Instruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2);
+                    break;
+                
+                // 2-operand FPR formats
+                case FORMAT_FRT_FRB:
+                    instr = generateTrg1Src1Instruction(cg(), opcode, fakeNode, dummyFPR1, dummyFPR2);
+                    break;
+                
+                // 2-operand VRF formats
+                case FORMAT_VRT_VRB:
+                case FORMAT_RT_VRB:
+                    instr = generateTrg1Src1Instruction(cg(), opcode, fakeNode, dummyVRF1, dummyVRF2);
+                    break;
+                
+                // 2-operand VSX formats
+                case FORMAT_XT_XB:
+                case FORMAT_XT_RA:
+                case FORMAT_RA_XS:
+                    instr = generateTrg1Src1Instruction(cg(), opcode, fakeNode, dummyVRF1, dummyVRF2);
+                    break;
+                
+                // Condition register formats
+                case FORMAT_BF_RA_RB:
+                case FORMAT_BF_RA_RB_L:
+                    instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyCCR, dummyGPR1, dummyGPR2);
+                    break;
+                case FORMAT_BF_FRA_FRB:
+                    instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyCCR, dummyFPR1, dummyFPR2);
+                    break;
+                case FORMAT_BF_BFA:
+                case FORMAT_BF_BFAI:
+                    instr = generateTrg1Src1Instruction(cg(), opcode, fakeNode, dummyCCR, dummyCCR);
+                    break;
+                case FORMAT_RT_BFA:
+                    instr = generateTrg1Src1Instruction(cg(), opcode, fakeNode, dummyGPR1, dummyCCR);
+                    break;
+                
+                // Immediate formats (GPR with immediate)
+                case FORMAT_RT_RA_SI16:
+                case FORMAT_RA_SI16:
+                    instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 0x1234);
+                    break;
+                case FORMAT_RA_RS_UI16:
+                    instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 0x5678);
+                    break;
+                case FORMAT_RT_SI16:
+                    instr = generateTrg1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, 0xABCD);
+                    break;
+                case FORMAT_RA_SI5:
+                    instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 15);
+                    break;
+                case FORMAT_BF_RA_SI16:
+                case FORMAT_BF_RA_UI16:
+                    instr = generateTrg1Src2ImmInstruction(cg(), opcode, fakeNode, dummyCCR, dummyGPR1, dummyGPR2, 0x100);
+                    break;
+                
+                // Shift/rotate formats
+                case FORMAT_RA_RS_SH5:
+                case FORMAT_RA_RS_SH6:
+                case FORMAT_RLDIC:
+                case FORMAT_RLDICL:
+                case FORMAT_RLDICR:
+                case FORMAT_RLDCL:
+                case FORMAT_RLWINM:
+                case FORMAT_RLWNM:
+                    instr = generateTrg1Src1Imm2Instruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 8, 0x1F);
+                    break;
+                
+                // 4-operand formats
+                case FORMAT_FRT_FRA_FRC_FRB:
+                    instr = generateTrg1Src3Instruction(cg(), opcode, fakeNode, dummyFPR1, dummyFPR2, dummyFPR2, dummyFPR2);
+                    break;
+                case FORMAT_VRT_VRA_VRB_VRC:
+                    instr = generateTrg1Src3Instruction(cg(), opcode, fakeNode, dummyVRF1, dummyVRF2, dummyVRF2, dummyVRF2);
+                    break;
+                case FORMAT_FRT_FRA_FRC:
+                    instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyFPR1, dummyFPR2, dummyFPR2);
+                    break;
+                
+                // Single register formats
+                case FORMAT_RT:
+                case FORMAT_RS:
+                    instr = generateTrg1Instruction(cg(), opcode, fakeNode, dummyGPR1);
+                    break;
+                
+                // Bit field formats
+                case FORMAT_RT_BI:
+                    instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyCCR, 2);
+                    break;
+                case FORMAT_BT_BA_BB:
+                    instr = generateTrg1Src2Instruction(cg(), opcode, fakeNode, dummyCCR, dummyCCR, dummyCCR);
+                    break;
+                
+                // Vector immediate formats
+                case FORMAT_VRT_VRB_UIM2:
+                case FORMAT_VRT_VRB_UIM3:
+                case FORMAT_VRT_VRB_UIM4:
+                case FORMAT_VRT_SIM:
+                    instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyVRF1, dummyVRF2, 5);
+                    break;
+                case FORMAT_XT_XB_UIM2:
+                    instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyVRF1, dummyVRF2, 2);
+                    break;
+                
+                // Special formats
+                case FORMAT_RS_FXM:
+                case FORMAT_RS_FXM1:
+                case FORMAT_RT_FXM1:
+                    instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 0xFF);
+                    break;
+                case FORMAT_BF_FRA_DM:
+                    instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyCCR, dummyFPR1, 3);
+                    break;
+                case FORMAT_FRT_FRA_FRB_RMC:
+                    instr = generateTrg1Src2ImmInstruction(cg(), opcode, fakeNode, dummyFPR1, dummyFPR2, dummyFPR2, 0);
+                    break;
+                case FORMAT_RT_RA_RB_RC:
+                case FORMAT_RT_RA_RB_BFC:
+                    instr = generateTrg1Src2ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, dummyGPR3, 1);
+                    break;
+                case FORMAT_VRT_VRA_VRB_SHB:
+                    instr = generateTrg1Src2ImmInstruction(cg(), opcode, fakeNode, dummyVRF1, dummyVRF2, dummyVRF2, 4);
+                    break;
+                case FORMAT_XT_XA_XB_DM:
+                case FORMAT_XT_XA_XB_SHW:
+                    instr = generateTrg1Src2ImmInstruction(cg(), opcode, fakeNode, dummyVRF1, dummyVRF2, dummyVRF2, 2);
+                    break;
+                
+                // Memory store formats
+                case FORMAT_RS_RA_RB_MEM:
+                case FORMAT_FRS_RA_RB_MEM:
+                case FORMAT_VRS_RA_RB_MEM:
+                case FORMAT_XS_RA_RB:
+                case FORMAT_XS_RA_RB_MEM:
+                    instr = generateSrc3Instruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, dummyGPR3);
+                    break;
+                
+                // Branch formats
+                case FORMAT_I_FORM:
+                case FORMAT_B_FORM:
+                case FORMAT_XL_FORM_BRANCH:
+                    instr = generateInstruction(cg(), opcode, fakeNode);
+                    break;
+                
+                // Special instruction formats
+                case FORMAT_MTFSFI:
+                case FORMAT_MTFSF:
+                    instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyFPR1, dummyFPR2, 0xFF);
+                    break;
+                
+                // Fallback for unknown/unsupported formats
+                default:
+                    instr = generateInstruction(cg(), opcode, fakeNode);
+                    break;
             }
             
             if (instr != nullptr)
