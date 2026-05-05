@@ -480,7 +480,11 @@ TEST_F(PowerAllInstructionsTest, GenerateAllInstructions)
             // Write human-readable instruction using TR_Debug
             if (debug) {
                 debug->print(textLogger, instr);
-                textLogger->println();
+                // Add note if format is unknown
+                PPCInstructionFormat format = op.getFormat();
+                if (format == FORMAT_UNKNOWN) {
+                    textLogger->print("  [FORMAT_UNKNOWN]");
+                }
                 textLogger->flush();
             }
         }
