@@ -247,10 +247,12 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
         
         // Create a logger for the text file using static create method
         auto textLogger = OMR::CStdIOStreamLogger::create(PERSISTENT_NEW, textFileHandle);
-        auto debug = cg()->comp()->getDebug();
         
+        // Create debug object if it doesn't exist
+        TR_Debug *debug = cg()->comp()->getDebug();
         if (debug == nullptr) {
-            printf("WARNING: Debug object is null, cannot print instructions\n");
+            debug = createDebugObject(cg()->comp());
+            cg()->comp()->setDebug(debug);
         }
         
         for (size_t i = 0; i < generatedInstructions.size(); i++)
