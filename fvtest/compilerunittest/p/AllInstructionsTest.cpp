@@ -281,6 +281,7 @@ TEST_F(PowerAllInstructionsTest, GenerateAllInstructions)
                 // Immediate formats (GPR with immediate)
                 case FORMAT_RT_RA_SI16:
                 case FORMAT_RA_SI16:
+                case FORMAT_RT_D16_RA:  // addi-like and load instructions with D16 displacement
                     instr = generateTrg1Src1ImmInstruction(cg(), opcode, fakeNode, dummyGPR1, dummyGPR2, 0x1234);
                     break;
                 case FORMAT_RA_RS_UI16:
