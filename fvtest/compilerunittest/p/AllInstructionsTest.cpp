@@ -245,8 +245,8 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
         printf("Binary file: all_instructions.bin\n");
         printf("Text file: all_instructions.txt\n");
         
-        // Create a logger for the text file
-        auto textLogger = new (PERSISTENT_NEW) OMR::CStdIOStreamLogger(textFileHandle, false);
+        // Create a logger for the text file using static create method
+        auto textLogger = OMR::CStdIOStreamLogger::create(PERSISTENT_NEW, textFileHandle);
         auto debug = cg()->comp()->getDebug();
         
         for (size_t i = 0; i < generatedInstructions.size(); i++)
