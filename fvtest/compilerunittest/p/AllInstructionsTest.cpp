@@ -249,6 +249,10 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
         auto textLogger = OMR::CStdIOStreamLogger::create(PERSISTENT_NEW, textFileHandle);
         auto debug = cg()->comp()->getDebug();
         
+        if (debug == nullptr) {
+            printf("WARNING: Debug object is null, cannot print instructions\n");
+        }
+        
         for (size_t i = 0; i < generatedInstructions.size(); i++)
         {
             TR::InstOpCode::Mnemonic opcode = generatedOpcodes[i];
@@ -276,8 +280,13 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
             if (debug) {
                 debug->print(textLogger, instr);
                 textLogger->println();
+                textLogger->flush();
             }
         }
+        
+        // Ensure all data is written
+        textLogger->flush();
+        fflush(textFileHandle);
         
         binaryFile.close();
         fclose(textFileHandle);
