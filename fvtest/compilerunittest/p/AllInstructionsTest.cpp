@@ -29,9 +29,12 @@
 #include "codegen/RegisterDependency.hpp"
 #include "il/Node.hpp"
 #include "il/Node_inlines.hpp"
+#include "ras/Debug.hpp"
 #include <vector>
 #include <random>
 #include <map>
+#include <fstream>
+#include <iomanip>
 
 #define PPC_INSTRUCTION_ALIGNMENT 32
 
@@ -232,8 +235,67 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
     }
     printf("==========================================\n\n");
     
+    // Write all instructions to files
+    std::ofstream binaryFile("all_instructions.bin", std::ios::binary);
+    std::ofstream textFile("all_instructions.txt");
+    
+    if (binaryFile.is_open() && textFile.is_open())
+    {
+        printf("\n=== Writing all instructions to files ===\n");
+        printf("Binary file: all_instructions.bin\n");
+        printf("Text file: all_instructions.txt\n");
+        
+        for (size_t i = 0; i < generatedInstructions.size(); i++)
+        {
+            TR::InstOpCode::Mnemonic opcode = generatedOpcodes[i];
+            TR::InstOpCode op(opcode);
+            TR::Instruction *instr = generatedInstructions[i];
+            
+            // Get the binary encoding
+            uint32_t prefix = op.getMetaData().prefix;
+            uint32_t encoding = op.getOpCodeBinaryEncoding();
+            PPCInstructionFormat format = op.getFormat();
+            std::string formatName = getFormatName(format);
+            
+            // Write binary encoding (big-endian format for Power)
+            if (prefix != 0) {
+                // Prefixed instruction: write prefix first, then encoding
+                uint32_t prefixBE = __builtin_bswap32(prefix);
+                uint32_t encodingBE = __builtin_bswap32(encoding);
+                binaryFile.write(reinterpret_cast<const char*>(&prefixBE), sizeof(prefixBE));
+                binaryFile.write(reinterpret_cast<const char*>(&encodingBE), sizeof(encodingBE));
+            } else {
+                // Regular 4-byte instruction
+                uint32_t encodingBE = __builtin_bswap32(encoding);
+                binaryFile.write(reinterpret_cast<const char*>(&encodingBE), sizeof(encodingBE));
+            }
+            
+            // Write human-readable text
+            if (prefix != 0) {
+                textFile << "Opcode " << std::setw(4) << opcode 
+                         << " (" << std::setw(20) << std::left << op.getMnemonicName() << "): "
+                         << "0x" << std::hex << std::setw(8) << std::setfill('0') << prefix
+                         << std::setw(8) << std::setfill('0') << encoding << std::dec
+                         << "  Format: " << formatName << " (Prefixed)\n";
+            } else {
+                textFile << "Opcode " << std::setw(4) << opcode 
+                         << " (" << std::setw(20) << std::left << op.getMnemonicName() << "): "
+                         << "0x" << std::hex << std::setw(8) << std::setfill('0') << encoding << std::dec
+                         << "  Format: " << formatName << "\n";
+            }
+        }
+        
+        binaryFile.close();
+        textFile.close();
+        printf("Successfully wrote %zu instructions to files\n", generatedInstructions.size());
+    }
+    else
+    {
+        printf("ERROR: Failed to open output files\n");
+    }
+    
     // Sample 10 random instructions and print their details
-    printf("=== Random Sample of Generated Instructions ===\n");
+    printf("\n=== Random Sample of Generated Instructions ===\n");
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, generatedInstructions.size() - 1);

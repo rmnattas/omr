@@ -85,24 +85,24 @@
 		inline void __restoreSMT() {  __asm__ __volatile__ ("or 6,6,6"); }
 
 #elif defined(_MSC_VER) /* defined(LINUXPPC) */
-		inline void __yield() { _mm_pause(); }
+		inline void omr_yield() { _mm_pause(); }
 #elif defined(__GNUC__) && (defined(J9X86) || defined(J9HAMMER)) /* defined(_MSC_VER) */
-		inline void __yield() { __asm volatile ("pause"); }
+		inline void omr_yield() { __asm volatile ("pause"); }
 #elif defined(J9ZOS390) /* defined(__GNUC__) && (defined(J9X86) || defined(J9HAMMER)) */
 #pragma convlit(suspend)
-		inline void __yield() { __asm__ volatile (" nop 0"); }
+		inline void omr_yield() { __asm__ volatile (" nop 0"); }
 #pragma convlit(resume)
 #elif defined(AARCH64) /* defined(J9ZOS390) */
-		inline void __yield() { __asm__ volatile ("yield"); }
+		inline void omr_yield() { __asm__ volatile ("yield"); }
 #else /* defined(AARCH64) */
-		inline void __yield() { __asm volatile ("# AtomicOperations::__yield"); }
+		inline void omr_yield() { __asm volatile ("# AtomicOperations::omr_yield"); }
 #endif /* defined(AIXPPC) */
 
 #if defined(_MSC_VER)
 		/* use compiler intrinsic */
 #elif defined(LINUXPPC) || defined(AIXPPC)
 		inline void __nop() { __asm__ __volatile__ ("nop"); }
-		inline void __yield() { __asm__ __volatile__ ("or 27,27,27"); }
+		inline void omr_yield() { __asm__ __volatile__ ("or 27,27,27"); }
 #elif defined(LINUX) && (defined(S390) || defined(S39064))
 		/*
 		 * nop instruction requires operand https://bugzilla.redhat.com/show_bug.cgi?id=506417
@@ -248,7 +248,7 @@ public:
 	yieldCPU()
 	{
 #if !defined(ATOMIC_SUPPORT_STUB)
-		__yield();
+		omr_yield();
 #endif /* !defined(ATOMIC_SUPPORT_STUB) */
 	}
 

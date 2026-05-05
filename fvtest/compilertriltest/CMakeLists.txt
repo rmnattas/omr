@@ -38,6 +38,9 @@ omr_add_executable(comptest NOWARNINGS
 	JitTestUtilitiesTest.cpp
 	ILValidatorTest.cpp
 	ArithmeticTest.cpp
+	BobathonTest.cpp
+	BobathonRefCountTest.cpp
+	BobathonCallTest.cpp
 	ShiftAndRotateTest.cpp
 	SimplifierFoldAbsNegTest.cpp
 	SimplifierFoldAndTest.cpp
