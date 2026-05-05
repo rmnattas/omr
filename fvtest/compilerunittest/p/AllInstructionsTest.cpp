@@ -184,25 +184,15 @@ TEST_F(PowerAllInstructionsTest, GenerateAllInstructions)
     std::vector<TR::Instruction*> generatedInstructions;
     std::vector<TR::InstOpCode::Mnemonic> generatedOpcodes;
     
-    // Create dummy registers for instruction generation and assign to real registers
-    TR::Register *dummyGPR1 = cg()->allocateRegister(TR_GPR);
-    TR::Register *dummyGPR2 = cg()->allocateRegister(TR_GPR);
-    TR::Register *dummyGPR3 = cg()->allocateRegister(TR_GPR);
-    TR::Register *dummyFPR1 = cg()->allocateRegister(TR_FPR);
-    TR::Register *dummyFPR2 = cg()->allocateRegister(TR_FPR);
-    TR::Register *dummyVRF1 = cg()->allocateRegister(TR_VRF);
-    TR::Register *dummyVRF2 = cg()->allocateRegister(TR_VRF);
-    TR::Register *dummyCCR = cg()->allocateRegister(TR_CCR);
-    
-    // Assign to real registers for proper printing
-    dummyGPR1->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::gr1));
-    dummyGPR2->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::gr2));
-    dummyGPR3->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::gr3));
-    dummyFPR1->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::fp1));
-    dummyFPR2->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::fp2));
-    dummyVRF1->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::vr1));
-    dummyVRF2->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::vr2));
-    dummyCCR->setAssignedRegister(cg()->machine()->getRealRegister(TR::RealRegister::cr0));
+    // Use real registers directly for proper symbolic name printing
+    TR::Register *dummyGPR1 = cg()->machine()->getRealRegister(TR::RealRegister::gr1);
+    TR::Register *dummyGPR2 = cg()->machine()->getRealRegister(TR::RealRegister::gr2);
+    TR::Register *dummyGPR3 = cg()->machine()->getRealRegister(TR::RealRegister::gr3);
+    TR::Register *dummyFPR1 = cg()->machine()->getRealRegister(TR::RealRegister::fp1);
+    TR::Register *dummyFPR2 = cg()->machine()->getRealRegister(TR::RealRegister::fp2);
+    TR::Register *dummyVRF1 = cg()->machine()->getRealRegister(TR::RealRegister::vr1);
+    TR::Register *dummyVRF2 = cg()->machine()->getRealRegister(TR::RealRegister::vr2);
+    TR::Register *dummyCCR = cg()->machine()->getRealRegister(TR::RealRegister::cr0);
     
     // Iterate through all Power opcodes
     for (int i = TR::InstOpCode::bad + 1; i < TR::InstOpCode::NumOpCodes; i++)
