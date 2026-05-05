@@ -246,7 +246,7 @@ TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
         printf("Text file: all_instructions.txt\n");
         
         // Create a logger for the text file
-        auto textLogger = OMR::CStdIOStreamLogger::create(trHeapMemory, textFileHandle);
+        auto textLogger = new (PERSISTENT_NEW) OMR::CStdIOStreamLogger(textFileHandle, false);
         auto debug = cg()->comp()->getDebug();
         
         for (size_t i = 0; i < generatedInstructions.size(); i++)
