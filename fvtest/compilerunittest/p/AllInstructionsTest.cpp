@@ -44,9 +44,9 @@
  * This test attempts to generate every instruction in the Power instruction set
  * and categorizes them by their instruction format metadata.
  */
-class PPCAllInstructionsTest : public TRTest::BinaryEncoderTest<PPC_INSTRUCTION_ALIGNMENT> {};
+class PowerAllInstructionsTest : public TRTest::BinaryEncoderTest<PPC_INSTRUCTION_ALIGNMENT> {};
 
-TEST_F(PPCAllInstructionsTest, GenerateAllInstructions)
+TEST_F(PowerAllInstructionsTest, GenerateAllInstructions)
 {
     // Static registers to use for instruction generation
     auto r0 = cg()->machine()->getRealRegister(TR::RealRegister::gr0);
