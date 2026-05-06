@@ -483,7 +483,7 @@ TEST_F(PowerAllInstructionsTest, GenerateAllInstructions)
                 // Add note if format is unknown
                 PPCInstructionFormat format = op.getFormat();
                 if (format == FORMAT_UNKNOWN) {
-                    textLogger->print("  [FORMAT_UNKNOWN]");
+                    textLogger->printf("  [FORMAT_UNKNOWN]");
                 }
                 textLogger->flush();
             }
