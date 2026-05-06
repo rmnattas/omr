@@ -462,19 +462,11 @@ TEST_F(PowerAllInstructionsTest, GenerateAllInstructions)
             TR::InstOpCode op(opcode);
             TR::Instruction *instr = generatedInstructions[i];
             
-            // Get the binary encoding
-            uint32_t prefix = op.getMetaData().prefix;
-            uint32_t encoding = op.getOpCodeBinaryEncoding();
+            // Encode the instruction properly with all operands
+            TRTest::BinaryInstruction encoded = encodeInstruction(instr);
             
-            // Write binary encoding (little-endian format for pLinux)
-            if (prefix != 0) {
-                // Prefixed instruction: write prefix first, then encoding
-                binaryFile.write(reinterpret_cast<const char*>(&prefix), sizeof(prefix));
-                binaryFile.write(reinterpret_cast<const char*>(&encoding), sizeof(encoding));
-            } else {
-                // Regular 4-byte instruction
-                binaryFile.write(reinterpret_cast<const char*>(&encoding), sizeof(encoding));
-            }
+            // Write the fully encoded binary instruction
+            binaryFile.write(reinterpret_cast<const char*>(encoded.getBuffer()), encoded.getLength());
             
             // Write human-readable instruction using TR_Debug
             if (debug) {
