@@ -466,17 +466,14 @@ TEST_F(PowerAllInstructionsTest, GenerateAllInstructions)
             uint32_t prefix = op.getMetaData().prefix;
             uint32_t encoding = op.getOpCodeBinaryEncoding();
             
-            // Write binary encoding (big-endian format for Power)
+            // Write binary encoding (little-endian format for pLinux)
             if (prefix != 0) {
                 // Prefixed instruction: write prefix first, then encoding
-                uint32_t prefixBE = __builtin_bswap32(prefix);
-                uint32_t encodingBE = __builtin_bswap32(encoding);
-                binaryFile.write(reinterpret_cast<const char*>(&prefixBE), sizeof(prefixBE));
-                binaryFile.write(reinterpret_cast<const char*>(&encodingBE), sizeof(encodingBE));
+                binaryFile.write(reinterpret_cast<const char*>(&prefix), sizeof(prefix));
+                binaryFile.write(reinterpret_cast<const char*>(&encoding), sizeof(encoding));
             } else {
                 // Regular 4-byte instruction
-                uint32_t encodingBE = __builtin_bswap32(encoding);
-                binaryFile.write(reinterpret_cast<const char*>(&encodingBE), sizeof(encodingBE));
+                binaryFile.write(reinterpret_cast<const char*>(&encoding), sizeof(encoding));
             }
             
             // Write human-readable instruction using TR_Debug
