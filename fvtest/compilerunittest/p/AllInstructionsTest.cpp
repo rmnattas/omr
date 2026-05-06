@@ -466,7 +466,7 @@ TEST_F(PowerAllInstructionsTest, GenerateAllInstructions)
             TRTest::BinaryInstruction encoded = encodeInstruction(instr);
             
             // Write the fully encoded binary instruction
-            binaryFile.write(reinterpret_cast<const char*>(encoded.getBuffer()), encoded.getLength());
+            binaryFile.write(reinterpret_cast<const char*>(encoded._buf), encoded._size);
             
             // Write human-readable instruction using TR_Debug
             if (debug) {
