@@ -2433,8 +2433,10 @@ void OMR::X86::CodeGenerator::buildRegisterMapForInstruction(TR_GCStackMap *map)
                         internalPtrMap = new (self()->trHeapMemory()) TR_InternalPointerMap(trMemory());
                     internalPtrMap->addInternalPointerPair(virtReg->getPinningArrayPointer(), i);
                     atlas->addPinningArrayPtrForInternalPtrReg(virtReg->getPinningArrayPointer());
-                } else if (virtReg->containsCollectedReference())
-                    map->setRegisterBits(registerBitMask(i));
+                } else if (virtReg->containsCollectedReference()){
+                    if (virtReg->getFutureUseCount() > 1)
+                        map->setRegisterBits(registerBitMask(i));
+                }
             }
         }
     }
