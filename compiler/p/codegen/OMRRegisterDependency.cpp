@@ -901,7 +901,7 @@ void OMR::Power::RegisterDependencyGroup::assignRegisters(TR::Instruction *curre
 
         if (virtReg->getAssignedRealRegister() != NULL) {
             if (_dependencies[i].isNoReg()) {
-                virtReg->block();
+                // virtReg->block();
             } else {
                 TR::RealRegister::RegNum assignedRegNum
                     = toRealRegister(virtReg->getAssignedRealRegister())->getRegisterNumber();
