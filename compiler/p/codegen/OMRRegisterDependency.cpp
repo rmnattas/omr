@@ -920,7 +920,7 @@ void OMR::Power::RegisterDependencyGroup::assignRegisters(TR::Instruction *curre
                 if ((virtReg->getKind() != TR_GPR || haveSpareGPRs)
                     && (virtReg->getKind() != TR_FPR || haveSpareFPRs)
                     && (virtReg->getKind() != TR_VRF || haveSpareVRFs)) {
-                    virtReg->block();
+                    // virtReg->block();
                 }
             } else {
                 TR::RealRegister::RegNum assignedRegNum
